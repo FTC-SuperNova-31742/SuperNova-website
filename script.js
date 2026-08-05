@@ -3,32 +3,20 @@ const PAGE_FRAGMENTS = {
     about: "pages/about.html",
     team: "pages/meet-the-mentors.html",
     season: "pages/season.html",
-    resources: "pages/resources.html",
+    biobuzz: "pages/bio-buzz.html",
     contact: "pages/contact.html",
 };
 
 const UPCOMING_EVENTS_URL = "data/upcoming-events.json";
 
 const MENTORS = [
-    { name: "Tej Shah", role: "President", img: "assets/mugshots/Tej-Shah.jpg" },
+    { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg" },
     { name: "Yutong Zhu", role: "Lead Software", img: "assets/mugshots/Yutong-Zhu.jpg" },
-    { name: "Xaiver Becerril", role: "Lead Mechanical", img: "assets/mugshots/Xaiver-Becerril.jpg" },
-    { name: "Evan Grinnell", role: "Lead Stats", img: "assets/mugshots/Evan-Grinnell.jpg" },
-    { name: "Nayeli Corrales", role: "Lead Media", img: "assets/mugshots/Nayeli-Corrales.jpg" },
-    { name: "Adriana Chavis", role: "Co Head Media", img: "assets/mugshots/Adriana-Chavis.jpg" },
-    { name: "Leonard Luna", role: "Mechanical", img: "assets/mugshots/Leonard-Luna.jpg" },
-    { name: "Loyal Tillet", role: "Mechanical", img: "assets/mugshots/Loyal-Tillet.jpg" },
-    { name: "Julia McPherson", role: "Design / Media", img: "assets/mugshots/Julia-McPherson.jpg" },
-    { name: "Ariel", role: "Design", img: "assets/mugshots/Ariel.jpg" },
-    { name: "Bee Darling", role: "Media", img: "assets/mugshots/Bee-Darling.jpg" },
+    { name: "Evan Grinnell", role: "Lead Software", img: "assets/mugshots/Evan-Grinnell.jpg" },
+    { name: "Leonard Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonard-Luna.jpg" },
+    { name: "Max", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
+    { name: "Jayden", role: "Lead Media", img: "" },
 ];
-
-function getInitials(name) {
-    const parts = name.trim().split(/\s+/);
-    const first = parts[0] ? parts[0][0] : "";
-    const second = parts[1] ? parts[1][0] : "";
-    return (first + second).toUpperCase();
-}
 
 function buildMentorCards() {
     const grid = document.getElementById("mentor-grid");
@@ -48,15 +36,6 @@ function buildMentorCards() {
         avatar.src = mentor.img;
         avatar.alt = mentor.name;
 
-        const initials = document.createElement("div");
-        initials.className = "team-avatar-initials";
-        initials.textContent = getInitials(mentor.name);
-
-        avatar.addEventListener("error", () => {
-            avatar.style.display = "none";
-            initials.style.display = "flex";
-        });
-
         const name = document.createElement("div");
         name.className = "team-name";
         name.textContent = mentor.name;
@@ -65,7 +44,7 @@ function buildMentorCards() {
         role.className = "team-role";
         role.textContent = mentor.role;
 
-        card.append(avatar, initials, name, role);
+        card.append(avatar, name, role);
         grid.appendChild(card);
     }
 }
@@ -118,7 +97,7 @@ async function renderUpcomingEvents() {
         }
 
         const cardsFragment = document.createDocumentFragment();
-
+
         upcomingEvents.forEach((event, index) => {
             const isNext = index === 0;
             const card = document.createElement("article");
@@ -242,6 +221,10 @@ function wireNavigation() {
         const pageName = getPageNameFromHash();
         showPage(pageName);
     });
+}
+
+async function init() {
+    wireNavigation();
 }
 
 async function init() {
