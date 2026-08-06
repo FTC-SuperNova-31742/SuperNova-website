@@ -1,6 +1,6 @@
 /* ============================================================
-	 DESIGN TOKENS - Humanized Edition
-	 ============================================================ */
+		 DESIGN TOKENS - Humanized Edition
+		 ============================================================ */
 :root {
 	--bg-main: #0f111a;
 	--bg-accent: #1a1d2e;
@@ -363,7 +363,7 @@ h2.section-title {
 .events-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-	gap: 1.5rem;
+	gap: 2rem;
 	margin-top: 1.5rem;
 }
 

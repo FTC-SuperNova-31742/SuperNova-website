@@ -2,7 +2,7 @@ const PAGE_FRAGMENTS = {
     home: "pages/home.html",
     about: "pages/about.html",
     team: "pages/meet-the-mentors.html",
-    season: "pages/season.html",
+    calendar: "pages/calendar.html",
     biobuzz: "pages/bio-buzz.html",
     contact: "pages/contact.html",
 };
