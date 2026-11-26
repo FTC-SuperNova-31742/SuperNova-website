@@ -230,17 +230,17 @@
         };
 
         try {
-            const beaconSent = navigator.sendBeacon
-                ? navigator.sendBeacon(url, new Blob([JSON.stringify(payload)], { type: "text/plain;charset=utf-8" }))
-                : false;
+            await fetch(url, {
+                method: "POST",
+                mode: "no-cors",
+                cache: "no-store",
+                keepalive: true,
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            });
 
-            if (!beaconSent) {
-                await fetch(url, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
-                });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(url, new Blob([JSON.stringify(payload)], { type: "text/plain;charset=utf-8" }));
             }
             entry.synced = false;
             entry.syncStatus = "submitted";
@@ -454,7 +454,16 @@
                 synced: false
             };
 
-            entries.unshift(entry);
+            const duplicateIndex = entries.findIndex((existing) =>
+                String(existing.teamNumber) === entry.teamNumber &&
+                existing.teamName === entry.teamName
+            );
+
+            if (duplicateIndex >= 0 && !entry.teamName) {
+                entries[duplicateIndex] = entry;
+            } else {
+                entries.unshift(entry);
+            }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 
             let submitted = false;
