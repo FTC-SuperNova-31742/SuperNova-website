@@ -12,8 +12,7 @@ const UPCOMING_EVENTS_URL = "data/upcoming-events.json";
 const MENTORS = [
     { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg" },
     { name: "Yutong Zhu", role: "Lead Software", img: "assets/mugshots/Yutong-Zhu.jpg" },
-    { name: "Evan Grinnell", role: "Lead Software", img: "assets/mugshots/Evan-Grinnell.jpg" },
-    { name: "Leonard Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonard-Luna.jpg" },
+    { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonard-Luna.jpg" },
     { name: "Max Zamora", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
     { name: "Jayden Mendoza", role: "Lead Media", img: "assets/mugshots/Jayden Mendoza.png" },
 ];
