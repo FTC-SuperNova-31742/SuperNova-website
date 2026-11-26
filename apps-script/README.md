@@ -2,6 +2,16 @@
 
 Use this setup to make the scouting page write and read one Google Spreadsheet.
 
+Verified Web App URL:
+
+`https://script.google.com/macros/s/AKfycbyiLAJlqh9GGTIc4HLJGShPdq6hVLprxKFJ7l9sQvuUhvJu460AxyFCb17YEpteV8ukeQ/exec`
+
+Verified connected spreadsheet:
+
+`https://docs.google.com/spreadsheets/d/1ns9RLojmf8AaNKSYVvqHISWrg9uHx3tzrH2rEga8kwM/edit`
+
+Its active data tab is `Pit Scouting Data`.
+
 1. Create or open the Google Sheet that should store all scouting entries.
 2. In the sheet, open **Extensions > Apps Script**.
 3. Replace the script editor content with `Code.gs` from this folder.
@@ -12,7 +22,7 @@ Use this setup to make the scouting page write and read one Google Spreadsheet.
 
 After deployment:
 
-- `Pit Scouting` is created automatically.
+- `Pit Scouting Data` is updated automatically.
 - Photos are uploaded to a Google Drive folder named `SuperNOVA 31742 Pit Scouting Photos`.
 - The `Photo URL` column contains a link to each uploaded photo.
 - The website checks the sheet on navigation and every 30 seconds.
