@@ -12,7 +12,7 @@ const PAGE_FRAGMENTS = {
 const UPCOMING_EVENTS_URL = "data/upcoming-events.json";
 
 const MENTORS = [
-    { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg" },
+    { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg", description: "Tej Shah is the Head Coach of the team, guiding and managing the team through various tasks." },
     { name: "Yutong Zhu", role: "Lead Software", img: "assets/mugshots/Yutong-Zhu.jpg" },
     { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonardo-Luna.jpg" },
     { name: "Max Zamora", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
@@ -29,6 +29,38 @@ function buildMentorCards() {
     }
 
     grid.innerHTML = "";
+
+    if (!document.getElementById("mentorDetailModal")) {
+        const modal = document.createElement("div");
+        modal.id = "mentorDetailModal";
+        modal.className = "mentor-detail-modal";
+        modal.hidden = true;
+        modal.innerHTML = `
+            <div class="mentor-detail-card" role="dialog" aria-modal="true" aria-labelledby="mentorDetailName">
+                <button type="button" class="mentor-detail-close" aria-label="Close mentor details">&times;</button>
+                <img class="mentor-detail-avatar" id="mentorDetailAvatar" alt="">
+                <div>
+                    <div class="team-role" id="mentorDetailRole"></div>
+                    <h3 id="mentorDetailName"></h3>
+                    <p id="mentorDetailDescription"></p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const closeModal = () => {
+            modal.hidden = true;
+            document.body.classList.remove("mentor-modal-open");
+        };
+
+        modal.querySelector(".mentor-detail-close").addEventListener("click", closeModal);
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) closeModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !modal.hidden) closeModal();
+        });
+    }
 
     for (const mentor of MENTORS) {
         const card = document.createElement("div");
@@ -59,6 +91,34 @@ function buildMentorCards() {
         role.textContent = mentor.role;
 
         card.append(avatar, name, role);
+
+        if (mentor.description) {
+            card.tabIndex = 0;
+            card.setAttribute("role", "button");
+            card.setAttribute("aria-label", `More about ${mentor.name}`);
+            card.classList.add("team-card-interactive");
+
+            const openMentorDetail = () => {
+                const modal = document.getElementById("mentorDetailModal");
+                document.getElementById("mentorDetailAvatar").src = mentor.img;
+                document.getElementById("mentorDetailAvatar").alt = mentor.name;
+                document.getElementById("mentorDetailRole").textContent = mentor.role;
+                document.getElementById("mentorDetailName").textContent = mentor.name;
+                document.getElementById("mentorDetailDescription").textContent = mentor.description;
+                modal.hidden = false;
+                document.body.classList.add("mentor-modal-open");
+                modal.querySelector(".mentor-detail-close").focus();
+            };
+
+            card.addEventListener("click", openMentorDetail);
+            card.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openMentorDetail();
+                }
+            });
+        }
+
         grid.appendChild(card);
     }
 }
