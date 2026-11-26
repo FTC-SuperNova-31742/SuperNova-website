@@ -1,0 +1,145 @@
+<section class="scouting-page">
+  <div class="section-inner">
+    <div class="scouting-header">
+      <div>
+        <div class="section-tag">2026-2027 Season</div>
+        <h2 class="section-title">Pit Scouting</h2>
+      </div>
+      <button type="button" id="scoutingSettingsButton" class="scout-button scout-button-secondary">
+        <span id="scoutingSyncDot" class="scouting-sync-dot"></span>
+        <span id="scoutingSyncLabel">Sheets Disconnected</span>
+      </button>
+    </div>
+
+    <div id="scoutingSettingsModal" class="scouting-modal" hidden>
+      <div class="scouting-modal-card" role="dialog" aria-modal="true" aria-labelledby="scoutingSettingsTitle">
+        <div class="scouting-modal-header">
+          <h3 id="scoutingSettingsTitle">Google Sheets Sync</h3>
+          <button type="button" id="scoutingSettingsClose" class="scout-icon-button" aria-label="Close settings">&times;</button>
+        </div>
+        <p>Use the default Apps Script connection or enter a custom Web App URL for this device.</p>
+        <label for="scoutingScriptUrl">Apps Script Web App URL</label>
+        <input type="url" id="scoutingScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        <div class="scouting-modal-actions">
+          <button type="button" id="scoutingResetUrl" class="scout-button scout-button-danger">Reset Override</button>
+          <button type="button" id="scoutingSaveUrl" class="scout-button scout-button-primary">Save &amp; Connect</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scouting-tabs" role="tablist">
+      <button type="button" id="scoutFormTab" class="scouting-tab active" role="tab" aria-selected="true">Pit Scout Form</button>
+      <button type="button" id="scoutedTeamsTab" class="scouting-tab" role="tab" aria-selected="false">Scouted Teams <span id="scoutedCountBadge">0</span></button>
+    </div>
+
+    <div id="scoutFormView" class="scouting-view">
+      <div class="scout-toolbar">
+        <div>
+          <strong>New Team Entry</strong>
+          <small>Auto-saves locally and syncs to Google Sheets.</small>
+        </div>
+        <button type="button" id="clearScoutingForm" class="scout-button scout-button-secondary">Clear Form</button>
+      </div>
+
+      <form id="pitScoutForm" class="scouting-form">
+        <fieldset>
+          <legend>1. Team Identity</legend>
+          <div class="scouting-grid two-columns">
+            <label>Team Number <span aria-hidden="true">*</span><input type="number" id="teamNumber" required min="1" placeholder="e.g. 31742"></label>
+            <label>Team Name <span aria-hidden="true">*</span><input type="text" id="teamName" required placeholder="e.g. SuperNOVA"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>2. Robot Capabilities</legend>
+          <label class="scouting-label">Game Elements Handled</label>
+          <div class="scouting-option-grid">
+            <label><input type="checkbox" name="gameElements" value="Pollen (3 inch)"> Pollen (3-inch balls)</label>
+            <label><input type="checkbox" name="gameElements" value="Nectar"> Nectar</label>
+            <label><input type="checkbox" name="gameElements" value="Both Pollen & Nectar"> Both Elements</label>
+            <label><input type="checkbox" name="gameElements" value="Neither (Defense/Pushbot)"> Neither / Push</label>
+          </div>
+
+          <label class="scouting-label">Scoring &amp; Field Tasks</label>
+          <div class="scouting-option-grid">
+            <label><input type="checkbox" name="scoringCaps" value="Launch into Hive"> Launch into the Hive</label>
+            <label><input type="checkbox" name="scoringCaps" value="Place in Flowers (Endgame)"> Place in Flowers</label>
+            <label><input type="checkbox" name="scoringCaps" value="Score in Garden"> Score in Garden</label>
+            <label><input type="checkbox" name="scoringCaps" value="Pull Pollen out of Flower"> Pull Pollen from Flowers</label>
+            <label><input type="checkbox" name="scoringCaps" value="Collect from Floor/Corners"> Collect floor / corners</label>
+          </div>
+
+          <label class="scouting-label">Endgame &amp; Vision</label>
+          <div class="scouting-option-grid">
+            <label><input type="checkbox" name="endgameSpecs" value="Park in Loading Zone"> Park in Loading Zone</label>
+            <label><input type="checkbox" name="endgameSpecs" value="Max Capacity (4 Pollen)"> Carries 4 Pollen</label>
+            <label><input type="checkbox" name="endgameSpecs" value="Uses AprilTags/Vision Alignment"> Uses AprilTags / vision</label>
+          </div>
+
+          <label>Extra Specs &amp; Performance Notes<textarea id="capabilitiesNotes" rows="3" placeholder="Drivetrain, intake style, cycle speed..."></textarea></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>3. Autonomous Routine</legend>
+          <label class="scouting-label">Starting Positions</label>
+          <div class="scouting-option-grid">
+            <label><input type="checkbox" name="autoStarts" value="Left Side Alliance Wall"> Left Side</label>
+            <label><input type="checkbox" name="autoStarts" value="Center Alliance Wall"> Center</label>
+            <label><input type="checkbox" name="autoStarts" value="Right Side Alliance Wall"> Right Side</label>
+            <label><input type="checkbox" name="autoStarts" value="No Auto"> No Auto</label>
+          </div>
+
+          <label class="scouting-label">Auto Actions &amp; Scoring</label>
+          <div class="scouting-option-grid">
+            <label><input type="checkbox" name="autoActions" value="Leaves Starting Location (SWARM RP)"> Leaves starting location</label>
+            <label><input type="checkbox" name="autoActions" value="Launches Pre-loaded Pollen into Hive"> Launches pre-loaded Pollen</label>
+            <label><input type="checkbox" name="autoActions" value="Intakes Extra Field Pollen"> Intakes field Pollen</label>
+            <label><input type="checkbox" name="autoActions" value="Parks in Loading Zone in Auto"> Parks in Loading Zone</label>
+          </div>
+
+          <label>Auto Path Details &amp; Consistency<textarea id="autoNotes" rows="3" placeholder="Describe the route and success rate..."></textarea></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>4. Outreach &amp; Team Story</legend>
+          <label>Local Community Outreach<textarea id="localOutreach" rows="3" placeholder="Local STEM events, workshops, outreach..."></textarea></label>
+          <label>Global Outreach<textarea id="globalOutreach" rows="3" placeholder="International partnerships or translated resources..."></textarea></label>
+          <label>Unique / Special Team Details<textarea id="specialInfo" rows="3" placeholder="Custom mechanisms, open-source work, team history..."></textarea></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>5. Robot Photo &amp; Consent</legend>
+          <span class="scouting-label">Can we take a picture of the robot?</span>
+          <div class="scouting-radio-row">
+            <label><input type="radio" name="photoPermission" value="Yes" checked> Yes</label>
+            <label><input type="radio" name="photoPermission" value="No"> No</label>
+          </div>
+          <div id="photoUploadContainer">
+            <label class="scout-upload-label" for="robotPhotoInput">Choose / Take Robot Photo</label>
+            <input type="file" id="robotPhotoInput" accept="image/*" capture="environment">
+            <p class="scouting-help">Photos are compressed and stored locally. Image data is not sent in the default Sheets payload.</p>
+            <div id="photoPreviewContainer" hidden><img id="photoPreviewImg" alt="Robot preview"><button type="button" id="removeScoutingPhoto" class="scout-icon-button" aria-label="Remove photo">&times;</button></div>
+          </div>
+        </fieldset>
+
+        <button type="submit" id="scoutingSubmitButton" class="scout-button scout-button-primary scout-submit">Save &amp; Sync Scouting Entry</button>
+      </form>
+    </div>
+
+    <div id="scoutedTeamsView" class="scouting-view" hidden>
+      <div class="scout-toolbar scout-list-toolbar">
+        <input type="search" id="teamSearchInput" placeholder="Search team number or name...">
+        <div class="scouting-toolbar-actions">
+          <button type="button" id="exportScoutingCSV" class="scout-button scout-button-secondary">Export CSV</button>
+          <button type="button" id="syncAllScouting" class="scout-button scout-button-secondary">Sync Pending</button>
+        </div>
+      </div>
+      <div class="scouting-stats">
+        <span>Total Scouted: <strong id="statTotalScouted">0</strong></span>
+        <span>Hive Capable: <strong id="statHiveScout">0</strong></span>
+        <span>Auto Ready: <strong id="statAutoScout">0</strong></span>
+      </div>
+      <div id="teamsListContainer" class="scouting-team-list"></div>
+    </div>
+  </div>
+</section>

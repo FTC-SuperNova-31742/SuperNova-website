@@ -658,9 +658,308 @@ footer {
 	color: var(--text-dim);
 }
 
+.scouting-page .section-inner { max-width: 900px; }
+
+.scouting-header,
+.scout-toolbar,
+.scouting-modal-header,
+.scouting-modal-actions,
+.scouting-team-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.scouting-header { margin-bottom: 1.5rem; }
+
+.scouting-sync-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--text-dim);
+}
+
+.scouting-sync-dot.connected { background: #34d399; }
+
+.scouting-modal[hidden] { display: none; }
+
+.scouting-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1050;
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+	background: rgba(15, 17, 26, 0.85);
+}
+
+.scouting-modal-card {
+	width: min(520px, 100%);
+	padding: 1.5rem;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-accent);
+}
+
+.scouting-modal-card h3 { margin: 0; color: var(--accent-color); }
+.scouting-modal-card p { color: var(--text-dim); }
+.scouting-modal-card label,
+.scouting-form label,
+.scouting-label {
+	display: block;
+	color: var(--text-main);
+	font-size: 0.85rem;
+	font-weight: 700;
+}
+
+.scouting-modal-card input,
+.scouting-form input[type="text"],
+.scouting-form input[type="number"],
+.scouting-form textarea,
+.scout-list-toolbar input {
+	width: 100%;
+	margin-top: 0.5rem;
+	padding: 0.75rem;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	background: var(--bg-main);
+	color: var(--text-main);
+}
+
+.scout-icon-button {
+	border: 0;
+	background: transparent;
+	color: var(--text-dim);
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+
+.scouting-modal-actions { justify-content: flex-end; margin-top: 1rem; }
+
+.scouting-tabs {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	margin-bottom: 1.5rem;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.scouting-tab {
+	padding: 0.85rem;
+	border: 0;
+	border-bottom: 3px solid transparent;
+	background: transparent;
+	color: var(--text-dim);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.scouting-tab.active {
+	border-bottom-color: var(--accent-color);
+	color: var(--accent-color);
+}
+
+.scouting-tab span {
+	display: inline-block;
+	margin-left: 0.35rem;
+	padding: 0.1rem 0.45rem;
+	border-radius: 999px;
+	background: var(--bg-highlight);
+}
+
+.scouting-view[hidden] { display: none; }
+
+.scout-toolbar {
+	margin-bottom: 1.5rem;
+	padding: 1rem;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-accent);
+}
+
+.scout-toolbar strong,
+.scout-toolbar small { display: block; }
+.scout-toolbar small { color: var(--text-dim); }
+
+.scout-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.45rem;
+	min-height: 40px;
+	padding: 0.6rem 0.9rem;
+	border-radius: 6px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.scout-button-primary {
+	border: 1px solid var(--accent-color);
+	background: var(--accent-color);
+	color: #000;
+}
+
+.scout-button-secondary {
+	border: 1px solid var(--border-color);
+	background: var(--bg-accent);
+	color: var(--text-main);
+}
+
+.scout-button-danger {
+	border: 1px solid #ef4444;
+	background: transparent;
+	color: #f87171;
+}
+
+.scouting-form {
+	display: grid;
+	gap: 1.25rem;
+}
+
+.scouting-form fieldset {
+	display: grid;
+	gap: 1rem;
+	margin: 0;
+	padding: 1.25rem;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-accent);
+}
+
+.scouting-form legend {
+	padding: 0 0.35rem;
+	color: var(--accent-color);
+	font-family: var(--font-mono);
+	font-weight: 700;
+}
+
+.scouting-grid { display: grid; gap: 1rem; }
+.scouting-grid.two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.scouting-option-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.6rem;
+}
+
+.scouting-option-grid label,
+.scouting-radio-row label {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	padding: 0.65rem;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	background: var(--bg-main);
+	font-size: 0.82rem;
+	font-weight: 500;
+}
+
+.scouting-option-grid input,
+.scouting-radio-row input { accent-color: var(--accent-color); }
+.scouting-radio-row { display: flex; gap: 0.75rem; }
+.scout-upload-label {
+	display: inline-block;
+	padding: 0.7rem 1rem;
+	border: 1px dashed var(--border-color);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+#robotPhotoInput { display: block; margin-top: 0.75rem; }
+.scouting-help { color: var(--text-dim); font-size: 0.78rem; }
+
+#photoPreviewContainer {
+	position: relative;
+	display: inline-block;
+	margin-top: 0.75rem;
+}
+
+#photoPreviewContainer[hidden] { display: none; }
+#photoPreviewImg { max-width: 240px; max-height: 180px; border-radius: 6px; }
+#photoPreviewContainer .scout-icon-button {
+	position: absolute;
+	top: 0.25rem;
+	right: 0.25rem;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: #ef4444;
+	color: white;
+}
+
+.scout-submit { width: 100%; }
+.scout-list-toolbar { align-items: stretch; }
+.scout-list-toolbar input { max-width: 420px; }
+.scouting-toolbar-actions { display: flex; gap: 0.6rem; }
+
+.scouting-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-bottom: 1rem;
+	color: var(--text-dim);
+}
+
+.scouting-stats strong { color: var(--text-main); }
+.scouting-team-list { display: grid; gap: 0.75rem; }
+.scouting-empty,
+.scouting-team-card {
+	padding: 1rem;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-accent);
+}
+
+.scouting-team-card p { margin: 0.5rem 0 0; color: var(--text-dim); }
+.scouting-team-card strong { color: var(--text-main); }
+.scouting-team-time { font-size: 0.78rem; }
+
+.scouting-sync-status {
+	padding: 0.25rem 0.55rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+
+.scouting-sync-status.synced { background: rgba(52, 211, 153, 0.12); color: #34d399; }
+.scouting-sync-status.pending { background: rgba(242, 206, 93, 0.12); color: var(--accent-color); }
+
+.scouting-toast-container {
+	position: fixed;
+	top: 1rem;
+	right: 1rem;
+	z-index: 2000;
+	display: grid;
+	gap: 0.5rem;
+	width: min(320px, calc(100vw - 2rem));
+}
+
+.scouting-toast {
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	background: var(--bg-accent);
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+	font-size: 0.82rem;
+}
+
+.scouting-toast-success { border-color: #34d399; }
+.scouting-toast-error { border-color: #ef4444; }
+
 @media (max-width: 700px) {
 	.about-grid { grid-template-columns: 1fr; gap: 2rem; }
 	.app-feature { grid-template-columns: 1fr; }
+	.scouting-header { align-items: flex-start; }
+	.scouting-header .section-title { font-size: 2rem; }
+	.scouting-grid.two-columns,
+	.scouting-option-grid { grid-template-columns: 1fr; }
+	.scout-list-toolbar,
+	.scouting-team-card-header { align-items: stretch; flex-direction: column; }
+	.scout-list-toolbar input { max-width: none; }
+	.scouting-toolbar-actions { width: 100%; }
+	.scouting-toolbar-actions .scout-button { flex: 1; }
 }
 
 @media (max-width: 640px) {

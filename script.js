@@ -5,6 +5,7 @@ const PAGE_FRAGMENTS = {
     calendar: "pages/calendar.html",
     biobuzz: "pages/bio-buzz.html",
     resources: "pages/resources.html",
+    scouting: "pages/scouting.html",
     contact: "pages/contact.html",
 };
 
@@ -190,6 +191,10 @@ function showPage(pageName) {
         renderUpcomingEvents();
     }
 
+    if (pageName === "scouting" && window.initScoutingApp) {
+        window.initScoutingApp();
+    }
+
     triggerReveal();
 }
 
@@ -271,6 +276,10 @@ async function init() {
 
     buildMentorCards();
     await renderUpcomingEvents();
+
+    if (window.initScoutingApp) {
+        window.initScoutingApp();
+    }
 
     // Load the page based on the initial hash (enables deep-linking)
     const pageName = getPageNameFromHash();
