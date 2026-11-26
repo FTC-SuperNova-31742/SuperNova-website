@@ -58,7 +58,56 @@ function doPost(request) {
   }
 }
 
-function doGet() {
+function doGet(request) {
+  const action = request && request.parameter ? request.parameter.action : "";
+
+  if (action === "test") {
+    const sheet = getOrCreateSheet();
+    ensureHeaders(sheet);
+    return jsonResponse({
+      ok: true,
+      service: "SuperNOVA 31742 Pit Scouting",
+      sheetName: SHEET_NAME,
+      rowCount: Math.max(sheet.getLastRow() - 1, 0)
+    });
+  }
+
+  if (action === "entries") {
+    const sheet = getOrCreateSheet();
+    ensureHeaders(sheet);
+    const lastRow = sheet.getLastRow();
+
+    if (lastRow < 2) {
+      return jsonResponse({ ok: true, entries: [] });
+    }
+
+    const values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
+    const entries = values
+      .filter((row) => row[1] || row[2])
+      .map((row) => ({
+        timestamp: row[0] instanceof Date ? row[0].toLocaleString() : String(row[0] || ""),
+        teamNumber: String(row[1] || ""),
+        teamName: String(row[2] || ""),
+        gameElements: String(row[3] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        scoringCaps: String(row[4] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        endgameSpecs: String(row[5] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        capabilitiesNotes: String(row[6] || ""),
+        autoStarts: String(row[7] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        autoActions: String(row[8] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        autoNotes: String(row[9] || ""),
+        localOutreach: String(row[10] || ""),
+        globalOutreach: String(row[11] || ""),
+        specialInfo: String(row[12] || ""),
+        photoPermission: String(row[13] || ""),
+        hasPhoto: Boolean(row[15]),
+        photoUrl: String(row[15] || ""),
+        synced: true,
+        syncStatus: "verified"
+      }));
+
+    return jsonResponse({ ok: true, entries: entries });
+  }
+
   return jsonResponse({ ok: true, service: "SuperNOVA 31742 Pit Scouting" });
 }
 
@@ -73,7 +122,8 @@ function getOrCreateSheet() {
 
 function ensureHeaders(sheet) {
   const existing = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
-  if (existing.every((value) => !value)) {
+  const headersMatch = existing.every((value, index) => value === HEADERS[index]);
+  if (!headersMatch) {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   }
 }

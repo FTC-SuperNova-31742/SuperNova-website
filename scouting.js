@@ -6,6 +6,7 @@
     let entries = [];
     let photoData = "";
     let initialized = false;
+    let remoteRefreshTimer = null;
 
     function getScriptUrl() {
         return (localStorage.getItem(SCRIPT_URL_OVERRIDE_KEY) || EMBEDDED_SCRIPT_URL).trim();
@@ -101,6 +102,68 @@
         document.getElementById("scoutingSettingsModal").hidden = true;
     }
 
+    async function testConnection() {
+        const url = getScriptUrl();
+        if (!url) {
+            showToast("Add an Apps Script Web App URL first.", "error");
+            return false;
+        }
+
+        try {
+            const response = await fetch(`${url}${url.includes("?") ? "&" : "?"}action=test&_=${Date.now()}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (!result.ok) throw new Error(result.error || "Apps Script returned an error");
+            showToast("Google Sheets connection verified.", "success");
+            return true;
+        } catch (error) {
+            showToast(`Sheets connection check failed: ${error.message}`, "error");
+            return false;
+        }
+    }
+
+    async function refreshRemoteEntries() {
+        const url = getScriptUrl();
+        if (!url) return;
+
+        try {
+            const response = await fetch(`${url}${url.includes("?") ? "&" : "?"}action=entries&_=${Date.now()}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (!result.ok) throw new Error(result.error || "Could not read sheet entries");
+
+            let changed = false;
+            for (const remoteEntry of result.entries || []) {
+                const localIndex = entries.findIndex((entry) =>
+                    String(entry.teamNumber) === String(remoteEntry.teamNumber) &&
+                    entry.teamName === remoteEntry.teamName
+                );
+
+                if (localIndex >= 0) {
+                    entries[localIndex] = {
+                        ...entries[localIndex],
+                        ...remoteEntry,
+                        id: entries[localIndex].id
+                    };
+                } else {
+                    entries.push({
+                        ...remoteEntry,
+                        id: `sheet-${remoteEntry.teamNumber}-${remoteEntry.teamName}-${remoteEntry.timestamp}`
+                    });
+                }
+                changed = true;
+            }
+
+            if (changed) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+                updateStats();
+                renderTeamsList();
+            }
+        } catch (error) {
+            console.warn("Could not refresh Scouting entries:", error);
+        }
+    }
+
     async function pushEntry(entry) {
         const url = getScriptUrl();
         if (!url) return false;
@@ -134,10 +197,12 @@
                 body: JSON.stringify(payload)
             });
             entry.synced = true;
+            entry.syncStatus = "submitted";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
             return true;
         } catch (error) {
             entry.synced = false;
+            entry.syncStatus = "failed";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
             return false;
         }
@@ -202,7 +267,7 @@
             <article class="scouting-team-card">
                 <div class="scouting-team-card-header">
                     <div><strong>#${escapeHtml(entry.teamNumber)}</strong> ${escapeHtml(entry.teamName)}</div>
-                    <span class="scouting-sync-status ${entry.synced ? "synced" : "pending"}">${entry.synced ? "Synced" : "Local Only"}</span>
+                    <span class="scouting-sync-status ${entry.synced ? "synced" : "pending"}">${entry.synced ? "Submitted" : "Local Only"}</span>
                 </div>
                 <p><strong>Capabilities:</strong> ${escapeHtml((entry.scoringCaps || []).join(", ") || "None listed")}</p>
                 <p><strong>Auto:</strong> ${escapeHtml((entry.autoStarts || []).join(", ") || "None")} - ${escapeHtml((entry.autoActions || []).join(", ") || "No actions listed")}</p>
@@ -240,36 +305,36 @@
         }
         const pending = entries.filter((entry) => !entry.synced);
         if (!pending.length) {
-            showToast("All scouted teams are already synced.", "success");
+            showToast("All scouted teams have been submitted.", "success");
             return;
         }
         for (const entry of pending) await pushEntry(entry);
         updateStats();
         renderTeamsList();
-        showToast(`Synced ${pending.filter((entry) => entry.synced).length} team entry(ies).`, "success");
+        showToast(`Submitted ${pending.filter((entry) => entry.synced).length} team entry(ies). Refreshing sheet data.`, "success");
+        refreshRemoteEntries();
     }
 
     function wireEvents() {
         document.getElementById("scoutingSettingsButton").addEventListener("click", openSettings);
         document.getElementById("scoutingSettingsClose").addEventListener("click", closeSettings);
-        document.getElementById("scoutingResetUrl").addEventListener("click", () => {
-            localStorage.removeItem(SCRIPT_URL_OVERRIDE_KEY);
-            closeSettings();
-            updateSyncBadge();
-            showToast("Reset to the embedded Sheets connection.", "info");
-        });
-        document.getElementById("scoutingSaveUrl").addEventListener("click", () => {
+        document.getElementById("scoutingSaveUrl").addEventListener("click", async () => {
             const url = document.getElementById("scoutingScriptUrl").value.trim();
             if (!url) {
                 showToast("Enter a valid Apps Script Web App URL.", "error");
                 return;
             }
             localStorage.setItem(SCRIPT_URL_OVERRIDE_KEY, url);
+            updateSyncBadge();
+            const verified = await testConnection();
+            if (verified) closeSettings();
+        });
+        document.getElementById("scoutingResetUrl").addEventListener("click", () => {
+            localStorage.removeItem(SCRIPT_URL_OVERRIDE_KEY);
             closeSettings();
             updateSyncBadge();
-            showToast("Google Sheets connection saved.", "success");
+            showToast("Reset to the embedded Sheets connection.", "info");
         });
-
         document.getElementById("scoutFormTab").addEventListener("click", () => switchTab("form"));
         document.getElementById("scoutedTeamsTab").addEventListener("click", () => switchTab("teams"));
         document.getElementById("clearScoutingForm").addEventListener("click", () => {
@@ -335,11 +400,16 @@
             autoActions: entry.autoActions || [],
             photoBase64: entry.photoBase64 || "",
             photoMimeType: entry.photoMimeType || "",
-            photoName: entry.photoName || ""
+            photoName: entry.photoName || "",
+            syncStatus: entry.syncStatus || (entry.synced ? "submitted" : "local")
         }));
         updateSyncBadge();
         updateStats();
         renderTeamsList();
         wireEvents();
+        refreshRemoteEntries();
+        if (!remoteRefreshTimer) {
+            remoteRefreshTimer = window.setInterval(refreshRemoteEntries, 30000);
+        }
     };
 })();
