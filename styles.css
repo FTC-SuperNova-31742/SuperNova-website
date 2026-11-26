@@ -913,6 +913,7 @@ footer {
 }
 
 .scouting-team-card p { margin: 0.5rem 0 0; color: var(--text-dim); }
+.scouting-team-card a { color: var(--accent-color); }
 .scouting-team-card strong { color: var(--text-main); }
 .scouting-team-time { font-size: 0.78rem; }
 

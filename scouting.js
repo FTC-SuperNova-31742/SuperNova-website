@@ -239,9 +239,6 @@
                 body: JSON.stringify(payload)
             });
 
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(url, new Blob([JSON.stringify(payload)], { type: "text/plain;charset=utf-8" }));
-            }
             entry.synced = false;
             entry.syncStatus = "submitted";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
@@ -350,6 +347,7 @@
                 </div>
                 <p><strong>Capabilities:</strong> ${escapeHtml((entry.scoringCaps || []).join(", ") || "None listed")}</p>
                 <p><strong>Auto:</strong> ${escapeHtml((entry.autoStarts || []).join(", ") || "None")} - ${escapeHtml((entry.autoActions || []).join(", ") || "No actions listed")}</p>
+                ${entry.photoUrl ? `<p><a href="${escapeHtml(entry.photoUrl)}" target="_blank" rel="noopener noreferrer">Open Robot Photo</a></p>` : ""}
                 <p class="scouting-team-time">${escapeHtml(entry.timestamp)}</p>
             </article>
         `).join("");
@@ -375,6 +373,19 @@
         link.download = "FTC_31742_SuperNOVA_Pit_Scout.csv";
         link.click();
         URL.revokeObjectURL(link.href);
+    }
+
+    function clearLocalData() {
+        if (!confirm("Clear browser-only scouting data? This does not delete rows from Google Sheets.")) {
+            return;
+        }
+
+        entries = [];
+        localStorage.removeItem(STORAGE_KEY);
+        updateStats();
+        renderTeamsList();
+        showToast("Browser-only scouting data cleared. Reloading verified sheet entries.", "info");
+        refreshRemoteEntries();
     }
 
     async function syncPending() {
@@ -427,6 +438,7 @@
         document.getElementById("teamSearchInput").addEventListener("input", renderTeamsList);
         document.getElementById("exportScoutingCSV").addEventListener("click", exportCSV);
         document.getElementById("syncAllScouting").addEventListener("click", syncPending);
+        document.getElementById("clearScoutingLocalData").addEventListener("click", clearLocalData);
 
         document.getElementById("pitScoutForm").addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -459,7 +471,7 @@
                 existing.teamName === entry.teamName
             );
 
-            if (duplicateIndex >= 0 && !entry.teamName) {
+            if (duplicateIndex >= 0) {
                 entries[duplicateIndex] = entry;
             } else {
                 entries.unshift(entry);
