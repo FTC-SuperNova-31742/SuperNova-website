@@ -176,8 +176,8 @@
             let changed = false;
             for (const remoteEntry of result.entries || []) {
                 const localIndex = entries.findIndex((entry) =>
-                    String(entry.teamNumber) === String(remoteEntry.teamNumber) &&
-                    entry.teamName === remoteEntry.teamName
+                    (entry.entryId && remoteEntry.entryId && String(entry.entryId) === String(remoteEntry.entryId)) ||
+                    (!remoteEntry.entryId && String(entry.teamNumber) === String(remoteEntry.teamNumber) && entry.teamName === remoteEntry.teamName)
                 );
 
                 if (localIndex >= 0) {
@@ -232,22 +232,60 @@
         };
 
         try {
-            await fetch(url, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(payload)
-            });
+            const beaconSent = navigator.sendBeacon
+                ? navigator.sendBeacon(url, new Blob([JSON.stringify(payload)], { type: "text/plain;charset=utf-8" }))
+                : false;
+
+            if (!beaconSent) {
+                await fetch(url, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payload)
+                });
+            }
             entry.synced = false;
             entry.syncStatus = "submitted";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-            return true;
+            await refreshAfterSubmission(entry);
+            return entry.syncStatus === "verified";
         } catch (error) {
             entry.synced = false;
             entry.syncStatus = "failed";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
             return false;
         }
+    }
+
+    async function refreshAfterSubmission(entry) {
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+            await new Promise((resolve) => window.setTimeout(resolve, 1000));
+            const url = getScriptUrl();
+
+            try {
+                const result = await loadJsonp(url, { action: "entries" });
+                const remoteEntry = (result.entries || []).find((item) =>
+                    String(item.entryId) === String(entry.entryId || entry.id)
+                );
+
+                if (remoteEntry) {
+                    entry.syncStatus = "verified";
+                    entry.synced = true;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+                    updateStats();
+                    renderTeamsList();
+                    showToast(`Verified Team #${entry.teamNumber} in Google Sheets.`, "success");
+                    return;
+                }
+            } catch (error) {
+                console.warn("Could not verify Scouting row:", error);
+            }
+        }
+
+        entry.syncStatus = "submitted";
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+        renderTeamsList();
+        showToast(`Team #${entry.teamNumber} was submitted but could not be verified yet.`, "info");
     }
 
     function switchTab(tabName) {
