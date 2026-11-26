@@ -1,5 +1,5 @@
 (() => {
-    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiLAJlqh9GGTIc4HLJGShPdq6hVLprxKFJ7l9sQvuUhvJu460AxyFCb17YEpteV8ukeQ/exec";
+    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF1c2E9hXuhv6TmRY52DeedygdHZmmaPqmCD4o0hUjrtO1gPhT1fgDaHALGCbnhHA/exec";
     const STORAGE_KEY = "supernova_31742_biobuzz_scout_v1";
     const SCRIPT_URL_OVERRIDE_KEY = "supernova_31742_sheets_script_url_override";
 
@@ -230,14 +230,7 @@
         };
 
         try {
-            await fetch(url, {
-                method: "POST",
-                mode: "no-cors",
-                cache: "no-store",
-                keepalive: true,
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(payload)
-            });
+            submitViaHiddenForm(url, payload);
 
             entry.synced = false;
             entry.syncStatus = "submitted";
@@ -250,6 +243,32 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
             return false;
         }
+    }
+
+    function submitViaHiddenForm(url, payload) {
+        let frame = document.getElementById("scoutingSubmissionFrame");
+        if (!frame) {
+            frame = document.createElement("iframe");
+            frame.id = "scoutingSubmissionFrame";
+            frame.name = "scoutingSubmissionFrame";
+            frame.style.display = "none";
+            document.body.appendChild(frame);
+        }
+
+        const form = document.createElement("form");
+        form.action = url;
+        form.method = "POST";
+        form.target = frame.name;
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "payload";
+        input.value = JSON.stringify(payload);
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
     }
 
     async function refreshAfterSubmission(entry) {

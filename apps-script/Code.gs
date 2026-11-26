@@ -23,7 +23,13 @@ const HEADERS = [
 
 function doPost(request) {
   try {
-    const data = JSON.parse(request.postData.contents);
+    let data = {};
+
+    if (request.parameter && request.parameter.payload) {
+      data = JSON.parse(request.parameter.payload);
+    } else if (request.postData && request.postData.contents) {
+      data = JSON.parse(request.postData.contents);
+    }
     const sheet = getOrCreateSheet();
     ensureHeaders(sheet);
 
@@ -32,7 +38,7 @@ function doPost(request) {
       photoUrl = savePhotoToDrive(data);
     }
 
-    sheet.appendRow([
+    const rowValues = [
       data.timestamp || new Date(),
       data.teamNumber || "",
       data.teamName || "",
@@ -50,7 +56,17 @@ function doPost(request) {
       data.robotPhoto || "",
       photoUrl,
       new Date()
-    ]);
+    ];
+
+    const teamNumber = String(data.teamNumber || "").trim();
+    const teamName = String(data.teamName || "").trim();
+    const existingRow = findTeamRow(sheet, teamNumber, teamName);
+
+    if (existingRow > 0) {
+      sheet.getRange(existingRow, 1, 1, rowValues.length).setValues([rowValues]);
+    } else {
+      sheet.appendRow(rowValues);
+    }
 
     return jsonResponse({ ok: true, photoUrl: photoUrl });
   } catch (error) {
@@ -113,6 +129,19 @@ function doGet(request) {
   }
 
   return jsonpResponse({ ok: true, service: "SuperNOVA 31742 Pit Scouting" }, callback);
+}
+
+function findTeamRow(sheet, teamNumber, teamName) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+
+  const teams = sheet.getRange(2, 2, lastRow - 1, 2).getValues();
+  for (let index = 0; index < teams.length; index += 1) {
+    if (String(teams[index][0]).trim() === teamNumber && String(teams[index][1]).trim() === teamName) {
+      return index + 2;
+    }
+  }
+  return 0;
 }
 
 function getOrCreateSheet() {
