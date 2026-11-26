@@ -11,13 +11,13 @@ const PAGE_FRAGMENTS = {
 const UPCOMING_EVENTS_URL = "data/upcoming-events.json";
 
 const MENTORS = [
-    { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg", description: "Tej Shah is the Head Coach of the team, guiding and managing the team through various tasks." },
-    { name: "Yutong Zhu", role: "Lead Software", img: "assets/mugshots/Yutong-Zhu.jpg" },
-    { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonardo-Luna.jpg" },
-    { name: "Max Zamora", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
-    { name: "Jayden Mendoza", role: "Lead Media", img: "assets/mugshots/Jayden Mendoza.png" },
-    { name: "Gavin Cook", role: "Mentor", img: "assets/mugshots/Gavin-Cook.png" },
-    { name: "Jhon Odle", role: "Mentor", img: "assets/mugshots/Jhon-Odle.png" },
+    { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg", description: "Tej Shah manages the entire team through logistics, meeting planning, and team guidance, while also guiding the software department." },
+    { name: "Yutong Zhu", role: "Lead Software Mentor", img: "assets/mugshots/Yutong-Zhu.jpg", description: "Yutong Zhu guides the software department and teaches Java and block-based programming." },
+    { name: "Leonardo Luna", role: "Mechanical Mentor", img: "assets/mugshots/Leonardo-Luna.jpg", description: "Leonardo Luna helps the mechanical department with fabrication and assembly of the robot." },
+    { name: "Max Zamora", role: "Lead Mechanical Mentor", img: "assets/mugshots/Max-Zamora.jpg", description: "Max Zamora ensures the mechanical department is well organized and helps with robot design and assembly." },
+    { name: "Jayden Mendoza", role: "Lead Media Mentor", img: "assets/mugshots/Jayden Mendoza.png", description: "Jayden Mendoza ensures meetings and events are filmed, edits team videos, and also helps the software team." },
+    { name: "Gavin Cook", role: "Operations Mentor", img: "assets/mugshots/Gavin-Cook.png", description: "Gavin Cook helps in any department where support is needed, especially when teams require additional assistance." },
+    { name: "Jhon Odle", role: "Mechanical Mentor", img: "assets/mugshots/Jhon-Odle.png", description: "Jhon Odle assists the mechanical team with fabrication, assembly, and robot design, helping students develop their skills." },
 ];
 
 function buildMentorCards() {
