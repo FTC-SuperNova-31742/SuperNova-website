@@ -17,6 +17,8 @@ const MENTORS = [
     { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonardo-Luna.jpg" },
     { name: "Max Zamora", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
     { name: "Jayden Mendoza", role: "Lead Media", img: "assets/mugshots/Jayden Mendoza.png" },
+    { name: "Gavin Cook", role: "Mentor", img: "" },
+    { name: "Jhon Odle", role: "Mentor", img: "" },
 ];
 
 function buildMentorCards() {
@@ -32,10 +34,21 @@ function buildMentorCards() {
         const card = document.createElement("div");
         card.className = "team-card";
 
-        const avatar = document.createElement("img");
-        avatar.className = "team-avatar";
-        avatar.src = mentor.img;
-        avatar.alt = mentor.name;
+        let avatar;
+        if (mentor.img) {
+            avatar = document.createElement("img");
+            avatar.className = "team-avatar";
+            avatar.src = mentor.img;
+            avatar.alt = mentor.name;
+        } else {
+            avatar = document.createElement("div");
+            avatar.className = "team-avatar-initials";
+            avatar.setAttribute("aria-label", mentor.name);
+            avatar.textContent = mentor.name
+                .split(" ")
+                .map((part) => part[0])
+                .join("");
+        }
 
         const name = document.createElement("div");
         name.className = "team-name";
@@ -220,7 +233,7 @@ function navigateTo(pageName) {
         // Remove hash for home page (cleaner URL)
         window.history.pushState(null, "", window.location.pathname);
     }
-    
+
     // showPage will be called by hashchange event listener
     // For home, manually call showPage since pushState doesn't trigger hashchange
     if (pageName === "home") {

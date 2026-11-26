@@ -41,12 +41,12 @@ body > * { position: relative; z-index: 1; }
 	border-bottom: 3px solid var(--accent-color);
 }
 
-.custom-nav .navbar-brand, 
+.custom-nav .navbar-brand,
 .custom-nav .nav-link {
 	color: var(--text-dim) !important;
 }
 
-.custom-nav .nav-link:hover, 
+.custom-nav .nav-link:hover,
 .custom-nav .nav-link.active {
 	color: var(--text-main) !important;
 	background: var(--bg-highlight);
@@ -320,6 +320,18 @@ h2.section-title {
 .team-avatar {
 	object-fit: cover;
 	border: 3px solid var(--border-color);
+}
+
+.team-avatar-initials {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 3px solid var(--border-color);
+	background: var(--bg-highlight);
+	color: var(--accent-color);
+	font-family: var(--font-mono);
+	font-size: 1.6rem;
+	font-weight: 800;
 }
 
 .team-name {
