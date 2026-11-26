@@ -17,7 +17,7 @@ const MENTORS = [
     { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonardo-Luna.jpg" },
     { name: "Max Zamora", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
     { name: "Jayden Mendoza", role: "Lead Media", img: "assets/mugshots/Jayden Mendoza.png" },
-    { name: "Gavin Cook", role: "Mentor", img: "" },
+    { name: "Gavin Cook", role: "Mentor", img: "assets/mugshots/Gavin-Cook.png" },
     { name: "Jhon Odle", role: "Mentor", img: "assets/mugshots/Jhon-Odle.png" },
 ];
 
