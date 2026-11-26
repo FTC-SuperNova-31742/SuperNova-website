@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperNOVA Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="../assets/branding/5.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-2: #1d232c;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --gold: #f2ce5d;
+      --purple: #7c5cbf;
+      --green: #3fb950;
+      --red: #f85149;
+      --blue: #58a6ff;
+      --font-mono: "Space Mono", monospace;
+      --font-body: "DM Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    [hidden] { display: none !important; }
+
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1.25rem;
+      background:
+        linear-gradient(rgba(13,17,23,.94), rgba(13,17,23,.94)),
+        repeating-linear-gradient(45deg, transparent 0 18px, rgba(48,54,61,.18) 18px 19px);
+    }
+
+    .login-card {
+      width: min(410px, 100%);
+      padding: 2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, .38);
+    }
+
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-brand img { width: 58px; height: auto; }
+    .login-brand strong { display: block; font-family: var(--font-mono); }
+    .login-brand span { color: var(--muted); font-size: .85rem; }
+
+    .login-card h1 { margin: 0 0 .4rem; font-size: 1.45rem; }
+    .login-card p { margin: 0 0 1.25rem; color: var(--muted); }
+
+    .field-label {
+      display: block;
+      margin-bottom: .45rem;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .text-input,
+    .select-input,
+    .textarea-input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      padding: .72rem .8rem;
+      outline: none;
+    }
+
+    .text-input:focus,
+    .select-input:focus,
+    .textarea-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(242, 206, 93, .12);
+    }
+
+    .login-error {
+      min-height: 1.25rem;
+      margin: .65rem 0;
+      color: var(--red);
+      font-size: .85rem;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .danger-button {
+      min-height: 42px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      padding: .65rem .95rem;
+      font-weight: 700;
+    }
+
+    .primary-button { width: 100%; background: var(--gold); color: #090b10; }
+    .primary-button:hover { background: #ffe58a; }
+    .secondary-button { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+    .secondary-button:hover { border-color: var(--muted); }
+    .danger-button { background: transparent; border-color: rgba(248,81,73,.55); color: #ff7b72; }
+
+    button:disabled { cursor: wait; opacity: .65; }
+
+    .dashboard { min-height: 100vh; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,17,23,.96);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-row { display: flex; align-items: center; gap: .7rem; }
+    .brand-row img { width: 38px; height: auto; }
+    .brand-row strong { font-family: var(--font-mono); font-size: .95rem; }
+    .brand-row span { display: block; color: var(--muted); font-size: .72rem; }
+
+    .lock-button { min-height: 38px; padding: .5rem .75rem; }
+
+    .dashboard-main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .dashboard-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .dashboard-heading h2 {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: clamp(1.4rem, 4vw, 2rem);
+    }
+
+    .dashboard-heading p { margin: .25rem 0 0; color: var(--muted); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .left-column,
+    .right-column { display: grid; gap: 1rem; }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h3 { margin: 0; font-size: 1rem; }
+    .panel-body { padding: 1.1rem; }
+
+    .status-badge,
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .status-active { background: rgba(63,185,80,.14); color: #56d364; }
+    .status-locked { background: rgba(248,81,73,.14); color: #ff7b72; }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .password-readout {
+      margin: 0 0 1rem;
+      padding: .75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      font-family: var(--font-mono);
+      color: var(--gold);
+    }
+
+    .switch-wrap { display: flex; align-items: center; gap: .65rem; }
+    .switch { position: relative; width: 46px; height: 24px; }
+    .switch input { position: absolute; opacity: 0; }
+    .switch-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: var(--border);
+      transition: .2s;
+    }
+    .switch-track::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      border-radius: 50%;
+      background: var(--text);
+      transition: .2s;
+    }
+    .switch input:checked + .switch-track { background: var(--red); }
+    .switch input:checked + .switch-track::after { transform: translateX(22px); }
+
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+    .form-field.full { grid-column: 1 / -1; }
+    .textarea-input { min-height: 78px; resize: vertical; }
+    .form-actions { display: flex; justify-content: flex-end; margin-top: .9rem; }
+
+    .event-list,
+    .resource-list { display: grid; gap: .75rem; }
+
+    .event-card,
+    .resource-card {
+      display: grid;
+      gap: .7rem;
+      padding: .9rem;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface-2);
+    }
+
+    .event-card {
+      grid-template-columns: 82px minmax(0, 1fr) auto;
+      align-items: center;
+    }
+
+    .event-date {
+      text-align: center;
+      border-right: 1px solid var(--border);
+      padding-right: .75rem;
+    }
+
+    .event-date strong { display: block; color: var(--gold); font-family: var(--font-mono); font-size: 1.15rem; }
+    .event-date span { color: var(--muted); font-size: .72rem; }
+    .event-info strong { display: block; }
+    .event-info p { margin: .25rem 0 0; color: var(--muted); font-size: .82rem; }
+    .card-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem; }
+
+    .resource-card { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+    .resource-info strong { display: block; }
+    .resource-info p { margin: .25rem 0; color: var(--muted); font-size: .82rem; }
+    .resource-info a { color: var(--blue); font-size: .82rem; word-break: break-all; }
+
+    .category-software { background: rgba(88,166,255,.14); color: #79c0ff; }
+    .category-mechanical { background: rgba(242,206,93,.14); color: #f2ce5d; }
+    .category-scouting { background: rgba(63,185,80,.14); color: #56d364; }
+    .category-outreach { background: rgba(188,140,255,.14); color: #bc8cff; }
+    .category-team-docs { background: rgba(139,148,158,.14); color: #b1bac4; }
+
+    .empty-state {
+      padding: 1.25rem;
+      border: 1px dashed var(--border);
+      border-radius: 7px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .toast-container {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 100;
+      display: grid;
+      gap: .55rem;
+      width: min(340px, calc(100vw - 2rem));
+    }
+
+    .toast {
+      padding: .75rem .9rem;
+      border: 1px solid var(--border);
+      border-left-width: 4px;
+      border-radius: 6px;
+      background: var(--surface);
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      font-size: .85rem;
+    }
+
+    .toast-success { border-left-color: var(--green); }
+    .toast-error { border-left-color: var(--red); }
+
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .left-column { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar { height: auto; min-height: 68px; padding: .75rem 1rem; }
+      .brand-row span { display: none; }
+      .dashboard-main { padding: 1rem; }
+      .dashboard-heading { align-items: start; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: auto; }
+      .event-card { grid-template-columns: 64px minmax(0, 1fr); }
+      .event-card .card-actions { grid-column: 1 / -1; justify-content: flex-start; }
+      .resource-card { grid-template-columns: 1fr; }
+      .resource-card .card-actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <form id="loginForm" class="login-card">
+      <div class="login-brand">
+        <img src="../assets/branding/6.png" alt="SuperNOVA logo">
+        <div><strong>SuperNOVA</strong><span>FTC Team 31742</span></div>
+      </div>
+      <h1>Admin Dashboard</h1>
+      <p>Authorized team access only.</p>
+      <label class="field-label" for="adminPassword">Password</label>
+      <input id="adminPassword" class="text-input" type="password" autocomplete="current-password" placeholder="Enter admin password" required>
+      <div id="loginError" class="login-error" role="alert"></div>
+      <button id="loginButton" class="primary-button" type="submit">Unlock Dashboard</button>
+    </form>
+  </div>
+
+  <div id="dashboard" class="dashboard" hidden>
+    <header class="topbar">
+      <div class="brand-row">
+        <img src="../assets/branding/6.png" alt="SuperNOVA logo">
+        <div><strong>SuperNOVA Admin</strong><span>FTC Team 31742</span></div>
+      </div>
+      <button id="lockButton" class="secondary-button lock-button" type="button">Lock / Log Out</button>
+    </header>
+
+    <main class="dashboard-main">
+      <div class="dashboard-heading">
+        <div>
+          <h2>Control Center</h2>
+          <p>Manage team access, events, and resources.</p>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="left-column">
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Scouting Access</h3>
+              <span id="scoutStatusBadge" class="status-badge status-active">ACTIVE</span>
+            </div>
+            <div class="panel-body">
+              <span class="field-label">Current Scouting Password</span>
+              <p id="currentScoutPassword" class="password-readout">31742</p>
+              <label class="field-label" for="newScoutPassword">New Password</label>
+              <input id="newScoutPassword" class="text-input" type="text" minlength="1" placeholder="Enter new scouting password">
+              <button id="updateScoutPasswordButton" class="secondary-button" type="button" style="width:100%;margin-top:.65rem">Update Scout Password</button>
+
+              <div class="control-row" style="margin-top:1.25rem">
+                <div>
+                  <strong style="font-size:.86rem">Lock Scouting Page</strong>
+                  <p style="margin:.15rem 0 0;color:var(--muted);font-size:.78rem">Prevent user access</p>
+                </div>
+                <div class="switch-wrap">
+                  <label class="switch" aria-label="Lock scouting page">
+                    <input id="scoutLockToggle" type="checkbox">
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="right-column">
+          <section class="panel">
+            <div class="panel-header"><h3>Event Manager</h3></div>
+            <div class="panel-body">
+              <form id="eventForm">
+                <div class="form-grid">
+                  <div class="form-field full"><label class="field-label" for="eventTitle">Title</label><input id="eventTitle" class="text-input" type="text" required placeholder="Event title"></div>
+                  <div class="form-field"><label class="field-label" for="eventDate">Date</label><input id="eventDate" class="text-input" type="date" required></div>
+                  <div class="form-field"><label class="field-label" for="eventLocation">Location</label><input id="eventLocation" class="text-input" type="text" placeholder="Location"></div>
+                  <div class="form-field"><label class="field-label" for="eventStart">Start Time</label><input id="eventStart" class="text-input" type="time"></div>
+                  <div class="form-field"><label class="field-label" for="eventEnd">End Time</label><input id="eventEnd" class="text-input" type="time"></div>
+                  <div class="form-field"><label class="field-label" for="eventCategory">Category</label><select id="eventCategory" class="select-input"><option>Tournament</option><option>Outreach</option><option>Workshop</option><option>Team Meeting</option></select></div>
+                  <div class="form-field"><label class="field-label" for="eventVisibility">Visibility</label><select id="eventVisibility" class="select-input"><option>Public</option><option>Team Only</option></select></div>
+                </div>
+                <div class="form-actions"><button id="addEventButton" class="primary-button" type="submit" style="width:auto">Add Event</button></div>
+              </form>
+            </div>
+            <div class="panel-body" style="border-top:1px solid var(--border)"><div id="eventList" class="event-list"><div class="empty-state">Loading events...</div></div></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header"><h3>Resources Page Manager</h3></div>
+            <div class="panel-body">
+              <form id="resourceForm">
+                <div class="form-grid">
+                  <div class="form-field"><label class="field-label" for="resourceTitle">Title</label><input id="resourceTitle" class="text-input" type="text" required placeholder="Resource title"></div>
+                  <div class="form-field"><label class="field-label" for="resourceUrl">URL</label><input id="resourceUrl" class="text-input" type="url" required placeholder="https://..."></div>
+                  <div class="form-field"><label class="field-label" for="resourceCategory">Category</label><select id="resourceCategory" class="select-input"><option>Software</option><option>Mechanical</option><option>Scouting</option><option>Outreach</option><option>Team Docs</option></select></div>
+                  <div class="form-field"><label class="field-label" for="resourceDescription">Description</label><input id="resourceDescription" class="text-input" type="text" placeholder="Short description"></div>
+                </div>
+                <div class="form-actions"><button id="addResourceButton" class="primary-button" type="submit" style="width:auto">Add Resource</button></div>
+              </form>
+            </div>
+            <div class="panel-body" style="border-top:1px solid var(--border)"><div id="resourceList" class="resource-list"><div class="empty-state">Loading resources...</div></div></div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script>
+    const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+    const ADMIN_PASSWORD_HASH = "e498423d689178b7ee79bf9e9f61308b9bc47ce78a16f8fc517e5793ae74d116";
+
+    const ADMIN_SESSION_KEY = "supernova_admin_authenticated";
+    const ADMIN_TOKEN_KEY = "admin_token";
+    const MOCK_PREFIX = "supernova_admin_mock_";
+
+    const loginScreen = document.getElementById("loginScreen");
+    const dashboard = document.getElementById("dashboard");
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const adminPassword = document.getElementById("adminPassword");
+    const loginError = document.getElementById("loginError");
+
+    function mockGet(type) {
+      const defaults = {
+        settings: { scout_password: "31742", scout_locked: false },
+        events: [],
+        resources: []
+      };
+      const saved = localStorage.getItem(`${MOCK_PREFIX}${type}`);
+      if (saved) {
+        try { return JSON.parse(saved); } catch (_) {}
+      }
+      if (type in defaults) {
+        localStorage.setItem(`${MOCK_PREFIX}${type}`, JSON.stringify(defaults[type]));
+      }
+      return defaults[type] || [];
+    }
+
+    function mockSet(type, value) {
+      localStorage.setItem(`${MOCK_PREFIX}${type}`, JSON.stringify(value));
+    }
+
+    async function apiGet(type) {
+      if (SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
+        await new Promise((resolve) => setTimeout(resolve, 180));
+        return mockGet(type);
+      }
+
+      const url = new URL(SCRIPT_URL);
+      url.searchParams.set("type", type);
+      url.searchParams.set("admin_token", sessionStorage.getItem(ADMIN_TOKEN_KEY) || "");
+      const response = await fetch(url.toString(), { cache: "no-store" });
+      if (!response.ok) throw new Error("Request failed");
+      return response.json();
+    }
+
+    async function apiPost(action, payload = {}) {
+      if (SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
+        await new Promise((resolve) => setTimeout(resolve, 220));
+
+        if (action === "update_scout_password") {
+          const settings = mockGet("settings");
+          settings.scout_password = payload.scout_password;
+          mockSet("settings", settings);
+          return { ok: true, settings };
+        }
+
+        if (action === "update_scout_lock") {
+          const settings = mockGet("settings");
+          settings.scout_locked = Boolean(payload.scout_locked);
+          mockSet("settings", settings);
+          return { ok: true, settings };
+        }
+
+        if (action === "add_event") {
+          const events = mockGet("events");
+          events.push({ id: `event-${Date.now()}`, ...payload });
+          mockSet("events", events);
+          return { ok: true };
+        }
+
+        if (action === "delete_event") {
+          const events = mockGet("events").filter((event) => event.id !== payload.id);
+          mockSet("events", events);
+          return { ok: true };
+        }
+
+        if (action === "add_resource") {
+          const resources = mockGet("resources");
+          resources.push({ id: `resource-${Date.now()}`, ...payload });
+          mockSet("resources", resources);
+          return { ok: true };
+        }
+
+        if (action === "delete_resource") {
+          const resources = mockGet("resources").filter((resource) => resource.id !== payload.id);
+          mockSet("resources", resources);
+          return { ok: true };
+        }
+
+        return { ok: false, error: "Unknown action" };
+      }
+
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          payload,
+          admin_token: sessionStorage.getItem(ADMIN_TOKEN_KEY) || ""
+        })
+      });
+      if (!response.ok) throw new Error("Request failed");
+      return response.json();
+    }
+
+    async function sha256(text) {
+      const data = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function showToast(message, type = "success") {
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.getElementById("toastContainer").appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function setButtonLoading(button, loading, label) {
+      if (loading) {
+        button.dataset.originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = label || "Saving...";
+      } else {
+        button.disabled = false;
+        button.textContent = button.dataset.originalText || label || button.textContent;
+      }
+    }
+
+    function unlockDashboard() {
+      loginScreen.hidden = true;
+      dashboard.hidden = false;
+      loadDashboard();
+    }
+
+    async function loadDashboard() {
+      try {
+        const [settings, events, resources] = await Promise.all([
+          apiGet("settings"), apiGet("events"), apiGet("resources")
+        ]);
+        renderSettings(settings);
+        renderEvents(events);
+        renderResources(resources);
+      } catch (error) {
+        showToast("Error loading dashboard data", "error");
+      }
+    }
+
+    function renderSettings(settings) {
+      document.getElementById("currentScoutPassword").textContent = settings.scout_password || "31742";
+      document.getElementById("scoutLockToggle").checked = Boolean(settings.scout_locked);
+      updateScoutStatus(settings.scout_locked);
+    }
+
+    function updateScoutStatus(locked) {
+      const badge = document.getElementById("scoutStatusBadge");
+      badge.textContent = locked ? "LOCKED" : "ACTIVE";
+      badge.className = `status-badge ${locked ? "status-locked" : "status-active"}`;
+    }
+
+    function escapeHtml(value) {
+      const element = document.createElement("span");
+      element.textContent = String(value || "");
+      return element.innerHTML;
+    }
+
+    function renderEvents(events) {
+      const list = document.getElementById("eventList");
+      const sorted = [...events].sort((a, b) => `${a.date} ${a.startTime || ""}`.localeCompare(`${b.date} ${b.startTime || ""}`));
+
+      if (!sorted.length) {
+        list.innerHTML = '<div class="empty-state">No events scheduled.</div>';
+        return;
+      }
+
+      list.innerHTML = sorted.map((event) => {
+        const date = new Date(`${event.date}T12:00:00`);
+        const month = date.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+        const day = date.toLocaleDateString("en-US", { day: "2-digit" });
+        const time = event.startTime || "All day";
+        const end = event.endTime ? ` - ${escapeHtml(event.endTime)}` : "";
+
+        return `
+          <article class="event-card">
+            <div class="event-date"><strong>${escapeHtml(day)}</strong><span>${escapeHtml(month)}</span></div>
+            <div class="event-info">
+              <strong>${escapeHtml(event.title)}</strong>
+              <p>${escapeHtml(time)}${end} · ${escapeHtml(event.category)} · ${escapeHtml(event.visibility)}${event.location ? ` · ${escapeHtml(event.location)}` : ""}</p>
+            </div>
+            <div class="card-actions">
+              <button class="secondary-button" type="button" data-calendar-id="${escapeHtml(event.id)}">Add to Google Calendar</button>
+              <button class="danger-button" type="button" data-delete-event="${escapeHtml(event.id)}">Delete</button>
+            </div>
+          </article>`;
+      }).join("");
+
+      list.querySelectorAll("[data-calendar-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const event = sorted.find((item) => item.id === button.dataset.calendarId);
+          if (event) openGoogleCalendar(event);
+        });
+      });
+
+      list.querySelectorAll("[data-delete-event]").forEach((button) => {
+        button.addEventListener("click", () => deleteEvent(button.dataset.deleteEvent));
+      });
+    }
+
+    function openGoogleCalendar(event) {
+      const params = new URLSearchParams({
+        action: "TEMPLATE",
+        text: event.title,
+        dates: calendarDates(event),
+        details: `${event.category || ""}${event.location ? `\nLocation: ${event.location}` : ""}`,
+        location: event.location || ""
+      });
+      window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, "_blank", "noopener,noreferrer");
+    }
+
+    function calendarDates(event) {
+      const dateCompact = event.date.replace(/-/g, "");
+      if (!event.startTime || !event.endTime) {
+        const nextDate = new Date(`${event.date}T12:00:00`);
+        nextDate.setDate(nextDate.getDate() + 1);
+        const nextCompact = nextDate.toISOString().slice(0, 10).replace(/-/g, "");
+        return `${dateCompact}/${nextCompact}`;
+      }
+      const start = `${dateCompact}T${event.startTime.replace(/:/g, "")}00`;
+      const end = `${dateCompact}T${event.endTime.replace(/:/g, "")}00`;
+      return `${start}/${end}`;
+    }
+
+    function renderResources(resources) {
+      const list = document.getElementById("resourceList");
+      if (!resources.length) {
+        list.innerHTML = '<div class="empty-state">No resources added yet.</div>';
+        return;
+      }
+
+      list.innerHTML = [...resources].sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title)).map((resource) => {
+        const categoryClass = `category-${resource.category.toLowerCase().replace(/\s+/g, "-")}`;
+        return `
+          <article class="resource-card">
+            <div class="resource-info">
+              <strong>${escapeHtml(resource.title)}</strong>
+              <span class="category-badge ${categoryClass}">${escapeHtml(resource.category)}</span>
+              ${resource.description ? `<p>${escapeHtml(resource.description)}</p>` : ""}
+              <a href="${escapeHtml(resource.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(resource.url)}</a>
+            </div>
+            <div class="card-actions"><button class="danger-button" type="button" data-delete-resource="${escapeHtml(resource.id)}">Delete</button></div>
+          </article>`;
+      }).join("");
+
+      list.querySelectorAll("[data-delete-resource]").forEach((button) => {
+        button.addEventListener("click", () => deleteResource(button.dataset.deleteResource));
+      });
+    }
+
+    async function deleteEvent(id) {
+      if (!confirm("Delete this event?")) return;
+      try {
+        await apiPost("delete_event", { id });
+        showToast("Event deleted", "success");
+        renderEvents(await apiGet("events"));
+      } catch (error) {
+        showToast("Error saving", "error");
+      }
+    }
+
+    async function deleteResource(id) {
+      if (!confirm("Delete this resource?")) return;
+      try {
+        await apiPost("delete_resource", { id });
+        showToast("Resource deleted", "success");
+        renderResources(await apiGet("resources"));
+      } catch (error) {
+        showToast("Error saving", "error");
+      }
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      loginError.textContent = "";
+      setButtonLoading(loginButton, true, "Checking...");
+      try {
+        const password = adminPassword.value;
+        const hash = await sha256(password);
+        if (hash !== ADMIN_PASSWORD_HASH) {
+          loginError.textContent = "Incorrect password. Please try again.";
+          adminPassword.select();
+          return;
+        }
+        sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+        sessionStorage.setItem(ADMIN_TOKEN_KEY, password);
+        unlockDashboard();
+      } catch (error) {
+        loginError.textContent = "Unable to verify password in this browser.";
+      } finally {
+        setButtonLoading(loginButton, false);
+      }
+    });
+
+    document.getElementById("lockButton").addEventListener("click", () => {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      dashboard.hidden = true;
+      loginScreen.hidden = false;
+      adminPassword.value = "";
+      loginError.textContent = "";
+      adminPassword.focus();
+    });
+
+    document.getElementById("updateScoutPasswordButton").addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      const password = document.getElementById("newScoutPassword").value.trim();
+      if (!password) {
+        showToast("Enter a new scouting password", "error");
+        return;
+      }
+      setButtonLoading(button, true);
+      try {
+        const result = await apiPost("update_scout_password", { scout_password: password });
+        renderSettings(result.settings || await apiGet("settings"));
+        document.getElementById("newScoutPassword").value = "";
+        showToast("Saved to Google Sheets", "success");
+      } catch (error) {
+        showToast("Error saving", "error");
+      } finally {
+        setButtonLoading(button, false);
+      }
+    });
+
+    document.getElementById("scoutLockToggle").addEventListener("change", async (event) => {
+      const locked = event.currentTarget.checked;
+      try {
+        const result = await apiPost("update_scout_lock", { scout_locked: locked });
+        renderSettings(result.settings || await apiGet("settings"));
+        showToast("Saved to Google Sheets", "success");
+      } catch (error) {
+        event.currentTarget.checked = !locked;
+        showToast("Error saving", "error");
+      }
+    });
+
+    document.getElementById("eventForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = document.getElementById("addEventButton");
+      setButtonLoading(button, true);
+      const payload = {
+        id: `event-${Date.now()}`,
+        title: document.getElementById("eventTitle").value.trim(),
+        date: document.getElementById("eventDate").value,
+        startTime: document.getElementById("eventStart").value,
+        endTime: document.getElementById("eventEnd").value,
+        location: document.getElementById("eventLocation").value.trim(),
+        category: document.getElementById("eventCategory").value,
+        visibility: document.getElementById("eventVisibility").value
+      };
+      try {
+        await apiPost("add_event", payload);
+        event.target.reset();
+        renderEvents(await apiGet("events"));
+        showToast("Saved to Google Sheets", "success");
+      } catch (error) {
+        showToast("Error saving", "error");
+      } finally {
+        setButtonLoading(button, false);
+      }
+    });
+
+    document.getElementById("resourceForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = document.getElementById("addResourceButton");
+      setButtonLoading(button, true);
+      const payload = {
+        id: `resource-${Date.now()}`,
+        title: document.getElementById("resourceTitle").value.trim(),
+        url: document.getElementById("resourceUrl").value.trim(),
+        category: document.getElementById("resourceCategory").value,
+        description: document.getElementById("resourceDescription").value.trim()
+      };
+      try {
+        await apiPost("add_resource", payload);
+        event.target.reset();
+        renderResources(await apiGet("resources"));
+        showToast("Saved to Google Sheets", "success");
+      } catch (error) {
+        showToast("Error saving", "error");
+      } finally {
+        setButtonLoading(button, false);
+      }
+    });
+
+    if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
+      unlockDashboard();
+    } else {
+      loginScreen.hidden = false;
+      dashboard.hidden = true;
+      adminPassword.focus();
+    }
+  </script>
+</body>
+</html>
