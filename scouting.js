@@ -1,5 +1,6 @@
 (() => {
     const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF1c2E9hXuhv6TmRY52DeedygdHZmmaPqmCD4o0hUjrtO1gPhT1fgDaHALGCbnhHA/exec";
+    const GOOGLE_FORM_RESPONSE_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdQvNgWJgksQWDhp6xXgAeIb-GZo-9MqaQylGo7iRy0rTM8Gg/formResponse";
     const STORAGE_KEY = "supernova_31742_biobuzz_scout_v1";
     const SCRIPT_URL_OVERRIDE_KEY = "supernova_31742_sheets_script_url_override";
 
@@ -235,8 +236,9 @@
             entry.synced = false;
             entry.syncStatus = "submitted";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-            await refreshAfterSubmission(entry);
-            return entry.syncStatus === "verified";
+            renderTeamsList();
+            showToast(`Team #${entry.teamNumber} submitted to the Google Form.`, "success");
+            return true;
         } catch (error) {
             entry.synced = false;
             entry.syncStatus = "failed";
@@ -256,15 +258,65 @@
         }
 
         const form = document.createElement("form");
-        form.action = url;
+        form.action = GOOGLE_FORM_RESPONSE_URL;
         form.method = "POST";
         form.target = frame.name;
 
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "payload";
-        input.value = JSON.stringify(payload);
-        form.appendChild(input);
+        const gameElementMap = {
+            "Pollen (3-inch balls)": "Pollen",
+            "Nectar": "Nectar",
+            "Both Elements": "Both Elements",
+            "Neither / Push": "Neither / Push"
+        };
+        const scoringMap = {
+            "Launch into the Hive": "Launch into Hive",
+            "Place in Flowers": "Place in Flowers",
+            "Score in Garden": "Score in Garden",
+            "Pull Pollen from Flowers": "Pull Pollen",
+            "Collect floor / corners": "Collect floor/corners"
+        };
+        const endgameMap = {
+            "Park in Loading Zone": "Park in Loading Zone",
+            "Carries 4 Pollen": "Carries 4 Pollen",
+            "Uses AprilTags / vision": "Uses AprilTags/vision"
+        };
+        const autoMap = {
+            "Launches pre-loaded Pollen": "Scores Preload",
+            "Intakes field Pollen": "Picks Up & Scores Extra Elements",
+            "Parks in Loading Zone": "Parks in Target Zone",
+            "No Auto": "No Autonomous"
+        };
+
+        const fields = {
+            "entry.1220549383": payload.teamNumber,
+            "entry.1719592509": payload.teamName,
+            "entry.582909721": payload.gameElementsHandled ? payload.gameElementsHandled.split(", ").map((value) => gameElementMap[value]).filter(Boolean) : [],
+            "entry.960410558": payload.scoringFieldTasks ? payload.scoringFieldTasks.split(", ").map((value) => scoringMap[value]).filter(Boolean) : [],
+            "entry.1876797847": payload.endgameSpecsVision ? payload.endgameSpecsVision.split(", ").map((value) => endgameMap[value]).filter(Boolean) : [],
+            "entry.1436735722": payload.extraSpecs,
+            "entry.2006056287": payload.autoActionsScoring ? payload.autoActionsScoring.split(", ").map((value) => autoMap[value]).filter(Boolean) : [],
+            "entry.1262695810": [payload.autoStartingPositions, payload.autoPathDetails].filter(Boolean).join(" - "),
+            "entry.1038130739": [],
+            "entry.30134104": [
+                payload.localOutreach ? `Local outreach: ${payload.localOutreach}` : "",
+                payload.globalOutreach ? `Global outreach: ${payload.globalOutreach}` : "",
+                payload.specialDetails ? `Special details: ${payload.specialDetails}` : ""
+            ].filter(Boolean).join("\n"),
+            "entry.2073740303": payload.photoPermission === "Yes" ? "Yes" : "No",
+            "entry.1095971558": ""
+        };
+
+        Object.entries(fields).forEach(([name, value]) => {
+            const values = Array.isArray(value) ? value : [value];
+            values.forEach((item) => {
+                if (item === "" || item === null || item === undefined) return;
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = name;
+                input.value = item;
+                form.appendChild(input);
+            });
+        });
 
         document.body.appendChild(form);
         form.submit();

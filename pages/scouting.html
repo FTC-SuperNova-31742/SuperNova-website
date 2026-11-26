@@ -17,7 +17,7 @@
           <h3 id="scoutingSettingsTitle">Google Sheets Sync</h3>
           <button type="button" id="scoutingSettingsClose" class="scout-icon-button" aria-label="Close settings">&times;</button>
         </div>
-        <p>Use the default Apps Script connection or enter a custom Web App URL for this device.</p>
+        <p>Submissions use the connected Google Form and are saved to its linked Google Sheet.</p>
         <label for="scoutingScriptUrl">Apps Script Web App URL</label>
         <input type="url" id="scoutingScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
         <a id="scoutingOpenSheet" class="scout-button scout-button-secondary" target="_blank" rel="noopener noreferrer" hidden>Open Connected Sheet</a>
@@ -37,7 +37,7 @@
       <div class="scout-toolbar">
         <div>
           <strong>New Team Entry</strong>
-          <small>Auto-saves locally and syncs to Google Sheets.</small>
+          <small>Auto-saves locally and submits to Google Forms.</small>
         </div>
         <button type="button" id="clearScoutingForm" class="scout-button scout-button-secondary">Clear Form</button>
       </div>
@@ -118,7 +118,7 @@
           <div id="photoUploadContainer">
             <label class="scout-upload-label" for="robotPhotoInput">Choose / Take Robot Photo</label>
             <input type="file" id="robotPhotoInput" accept="image/*" capture="environment">
-            <p class="scouting-help">Photos are compressed locally and attached to the Google Sheets entry when the Apps Script is configured for photo uploads.</p>
+            <p class="scouting-help">Photos are compressed locally. Photo URL submission is available when a hosted photo URL is configured.</p>
             <div id="photoPreviewContainer" hidden><img id="photoPreviewImg" alt="Robot preview"><button type="button" id="removeScoutingPhoto" class="scout-icon-button" aria-label="Remove photo">&times;</button></div>
           </div>
         </fieldset>
