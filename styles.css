@@ -177,6 +177,60 @@ h2.section-title {
 	margin-bottom: 3rem;
 }
 
+.season-media {
+	max-width: 700px;
+	margin-top: 2.5rem;
+}
+
+.video-wrapper {
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: #000;
+}
+
+.video-wrapper iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+.league-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 1rem;
+	padding: 1rem 1.25rem;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-accent);
+	color: var(--text-main);
+	text-decoration: none;
+	transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.league-link:hover {
+	border-color: var(--accent-color);
+	background: var(--bg-highlight);
+}
+
+.league-link strong,
+.league-link small {
+	display: block;
+}
+
+.league-link strong {
+	color: var(--accent-color);
+}
+
+.league-link small {
+	margin-top: 0.15rem;
+	color: var(--text-dim);
+}
+
 .hero-ctas {
 	display: flex;
 	gap: 1rem;
