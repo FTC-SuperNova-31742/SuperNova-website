@@ -1,5 +1,5 @@
 (() => {
-    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycW_2O4IeLfHbatNkfazlonZMPmJjoRLICxhK0CoVWVEimhJRd-3RYioeRK365int86Q/exec";
+    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3UQAa8iN6T90sVBu-WHM5Gd71XvC5Zrk7_RBgog1ksJJIjT-3LxmqzV95HtDZbw4TAg/exec";
     const STORAGE_KEY = "supernova_31742_biobuzz_scout_v1";
     const SCRIPT_URL_OVERRIDE_KEY = "supernova_31742_sheets_script_url_override";
 
@@ -84,13 +84,24 @@
         reader.readAsDataURL(file);
     }
 
-    function updateSyncBadge() {
+    function updateSyncBadge(status = "unknown") {
         const label = document.getElementById("scoutingSyncLabel");
         const dot = document.getElementById("scoutingSyncDot");
         if (!label || !dot) return;
-        const connected = Boolean(getScriptUrl());
-        label.textContent = connected ? "Sheets Connected" : "Sheets Disconnected";
-        dot.className = `scouting-sync-dot ${connected ? "connected" : ""}`;
+
+        if (!getScriptUrl()) {
+            label.textContent = "Sheets Disconnected";
+            dot.className = "scouting-sync-dot";
+        } else if (status === "connected") {
+            label.textContent = "Sheets Verified";
+            dot.className = "scouting-sync-dot connected";
+        } else if (status === "failed") {
+            label.textContent = "Sheets Unreachable";
+            dot.className = "scouting-sync-dot";
+        } else {
+            label.textContent = "Testing Sheets...";
+            dot.className = "scouting-sync-dot";
+        }
     }
 
     function openSettings() {
@@ -102,6 +113,38 @@
         document.getElementById("scoutingSettingsModal").hidden = true;
     }
 
+    function loadJsonp(url, params) {
+        return new Promise((resolve, reject) => {
+            const callbackName = `__supernovaSheetCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+            const script = document.createElement("script");
+            const timeout = window.setTimeout(() => {
+                cleanup();
+                reject(new Error("Apps Script did not respond"));
+            }, 12000);
+
+            function cleanup() {
+                window.clearTimeout(timeout);
+                delete window[callbackName];
+                if (script.parentNode) script.parentNode.removeChild(script);
+            }
+
+            window[callbackName] = (result) => {
+                cleanup();
+                resolve(result);
+            };
+
+            const query = new URLSearchParams(params);
+            query.set("callback", callbackName);
+            query.set("_", Date.now().toString());
+            script.src = `${url}${url.includes("?") ? "&" : "?"}${query.toString()}`;
+            script.onerror = () => {
+                cleanup();
+                reject(new Error("Could not reach Apps Script"));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
     async function testConnection() {
         const url = getScriptUrl();
         if (!url) {
@@ -110,13 +153,13 @@
         }
 
         try {
-            const response = await fetch(`${url}${url.includes("?") ? "&" : "?"}action=test&_=${Date.now()}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const result = await response.json();
+            const result = await loadJsonp(url, { action: "test" });
             if (!result.ok) throw new Error(result.error || "Apps Script returned an error");
+            updateSyncBadge("connected");
             showToast("Google Sheets connection verified.", "success");
             return true;
         } catch (error) {
+            updateSyncBadge("failed");
             showToast(`Sheets connection check failed: ${error.message}`, "error");
             return false;
         }
@@ -127,9 +170,7 @@
         if (!url) return;
 
         try {
-            const response = await fetch(`${url}${url.includes("?") ? "&" : "?"}action=entries&_=${Date.now()}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const result = await response.json();
+            const result = await loadJsonp(url, { action: "entries" });
             if (!result.ok) throw new Error(result.error || "Could not read sheet entries");
 
             let changed = false;
@@ -169,6 +210,7 @@
         if (!url) return false;
 
         const payload = {
+            entryId: entry.id,
             timestamp: entry.timestamp,
             teamNumber: entry.teamNumber,
             teamName: entry.teamName,
@@ -196,7 +238,7 @@
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(payload)
             });
-            entry.synced = true;
+            entry.synced = false;
             entry.syncStatus = "submitted";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
             return true;
@@ -267,7 +309,7 @@
             <article class="scouting-team-card">
                 <div class="scouting-team-card-header">
                     <div><strong>#${escapeHtml(entry.teamNumber)}</strong> ${escapeHtml(entry.teamName)}</div>
-                    <span class="scouting-sync-status ${entry.synced ? "synced" : "pending"}">${entry.synced ? "Submitted" : "Local Only"}</span>
+                    <span class="scouting-sync-status ${entry.syncStatus === "verified" ? "synced" : "pending"}">${entry.syncStatus === "verified" ? "Verified in Sheet" : entry.syncStatus === "submitted" ? "Submitted - Pending Verification" : "Local Only"}</span>
                 </div>
                 <p><strong>Capabilities:</strong> ${escapeHtml((entry.scoringCaps || []).join(", ") || "None listed")}</p>
                 <p><strong>Auto:</strong> ${escapeHtml((entry.autoStarts || []).join(", ") || "None")} - ${escapeHtml((entry.autoActions || []).join(", ") || "No actions listed")}</p>
@@ -325,14 +367,14 @@
                 return;
             }
             localStorage.setItem(SCRIPT_URL_OVERRIDE_KEY, url);
-            updateSyncBadge();
+            updateSyncBadge("unknown");
             const verified = await testConnection();
             if (verified) closeSettings();
         });
         document.getElementById("scoutingResetUrl").addEventListener("click", () => {
             localStorage.removeItem(SCRIPT_URL_OVERRIDE_KEY);
             closeSettings();
-            updateSyncBadge();
+            updateSyncBadge("unknown");
             showToast("Reset to the embedded Sheets connection.", "info");
         });
         document.getElementById("scoutFormTab").addEventListener("click", () => switchTab("form"));
@@ -378,9 +420,9 @@
             entries.unshift(entry);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 
-            let synced = false;
-            if (getScriptUrl()) synced = await pushEntry(entry);
-            showToast(synced ? `Team #${entry.teamNumber} saved and sent to Google Sheets.` : `Team #${entry.teamNumber} saved locally.`, synced ? "success" : "error");
+            let submitted = false;
+            if (getScriptUrl()) submitted = await pushEntry(entry);
+            showToast(submitted ? `Team #${entry.teamNumber} submitted. Waiting for sheet verification.` : `Team #${entry.teamNumber} saved locally; Sheets is unreachable.`, submitted ? "info" : "error");
 
             resetForm();
             updateStats();
@@ -403,11 +445,13 @@
             photoName: entry.photoName || "",
             syncStatus: entry.syncStatus || (entry.synced ? "submitted" : "local")
         }));
-        updateSyncBadge();
+        updateSyncBadge("unknown");
         updateStats();
         renderTeamsList();
         wireEvents();
-        refreshRemoteEntries();
+        testConnection().then((connected) => {
+            if (connected) refreshRemoteEntries();
+        });
         if (!remoteRefreshTimer) {
             remoteRefreshTimer = window.setInterval(refreshRemoteEntries, 30000);
         }

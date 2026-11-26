@@ -59,17 +59,18 @@ function doPost(request) {
 }
 
 function doGet(request) {
+  const callback = request && request.parameter ? request.parameter.callback : "";
   const action = request && request.parameter ? request.parameter.action : "";
 
   if (action === "test") {
     const sheet = getOrCreateSheet();
     ensureHeaders(sheet);
-    return jsonResponse({
+    return jsonpResponse({
       ok: true,
       service: "SuperNOVA 31742 Pit Scouting",
       sheetName: SHEET_NAME,
       rowCount: Math.max(sheet.getLastRow() - 1, 0)
-    });
+    }, callback);
   }
 
   if (action === "entries") {
@@ -78,7 +79,7 @@ function doGet(request) {
     const lastRow = sheet.getLastRow();
 
     if (lastRow < 2) {
-      return jsonResponse({ ok: true, entries: [] });
+      return jsonpResponse({ ok: true, entries: [] }, callback);
     }
 
     const values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
@@ -105,10 +106,10 @@ function doGet(request) {
         syncStatus: "verified"
       }));
 
-    return jsonResponse({ ok: true, entries: entries });
+    return jsonpResponse({ ok: true, entries: entries }, callback);
   }
 
-  return jsonResponse({ ok: true, service: "SuperNOVA 31742 Pit Scouting" });
+  return jsonpResponse({ ok: true, service: "SuperNOVA 31742 Pit Scouting" }, callback);
 }
 
 function getOrCreateSheet() {
@@ -143,6 +144,16 @@ function getOrCreatePhotoFolder() {
   const folders = DriveApp.getFoldersByName(PHOTO_FOLDER_NAME);
   if (folders.hasNext()) return folders.next();
   return DriveApp.createFolder(PHOTO_FOLDER_NAME);
+}
+
+function jsonpResponse(data, callback) {
+  const json = JSON.stringify(data);
+  if (callback) {
+    return ContentService
+      .createTextOutput(`${callback}(${json})`)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return jsonResponse(data);
 }
 
 function jsonResponse(data) {
