@@ -4,7 +4,7 @@ Use this setup to make the scouting page write and read one Google Spreadsheet.
 
 Verified Web App URL:
 
-`https://script.google.com/macros/s/AKfycbxF1c2E9hXuhv6TmRY52DeedygdHZmmaPqmCD4o0hUjrtO1gPhT1fgDaHALGCbnhHA/exec`
+`https://script.google.com/macros/s/AKfycbxmvT8KYCnSxzTtg-htnOWjWrkfWj7VsVoVlbIMZwZbXXY1tqjsIKq--NTI1QzONejajQ/exec`
 
 Verified connected spreadsheet:
 

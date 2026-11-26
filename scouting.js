@@ -1,5 +1,6 @@
 (() => {
-    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF1c2E9hXuhv6TmRY52DeedygdHZmmaPqmCD4o0hUjrtO1gPhT1fgDaHALGCbnhHA/exec";
+    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmvT8KYCnSxzTtg-htnOWjWrkfWj7VsVoVlbIMZwZbXXY1tqjsIKq--NTI1QzONejajQ/exec";
+    const LEGACY_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF1c2E9hXuhv6TmRY52DeedygdHZmmaPqmCD4o0hUjrtO1gPhT1fgDaHALGCbnhHA/exec";
     const GOOGLE_FORM_RESPONSE_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdQvNgWJgksQWDhp6xXgAeIb-GZo-9MqaQylGo7iRy0rTM8Gg/formResponse";
     const STORAGE_KEY = "supernova_31742_biobuzz_scout_v1";
     const SCRIPT_URL_OVERRIDE_KEY = "supernova_31742_sheets_script_url_override";
@@ -10,7 +11,12 @@
     let remoteRefreshTimer = null;
 
     function getScriptUrl() {
-        return (localStorage.getItem(SCRIPT_URL_OVERRIDE_KEY) || EMBEDDED_SCRIPT_URL).trim();
+        const override = (localStorage.getItem(SCRIPT_URL_OVERRIDE_KEY) || "").trim();
+        if (override === LEGACY_SCRIPT_URL) {
+            localStorage.setItem(SCRIPT_URL_OVERRIDE_KEY, EMBEDDED_SCRIPT_URL);
+            return EMBEDDED_SCRIPT_URL;
+        }
+        return (override || EMBEDDED_SCRIPT_URL).trim();
     }
 
     function showToast(message, type = "info") {
@@ -231,6 +237,10 @@
         try {
             submitViaHiddenForm(GOOGLE_FORM_RESPONSE_URL, payload);
 
+            if (payload.photoBase64) {
+                submitViaHiddenForm(getScriptUrl(), payload);
+            }
+
             entry.synced = false;
             entry.syncStatus = "submitted";
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
@@ -256,9 +266,22 @@
         }
 
         const form = document.createElement("form");
-        form.action = GOOGLE_FORM_RESPONSE_URL;
+        const usesAppsScript = url.includes("script.google.com");
+        form.action = usesAppsScript ? url : GOOGLE_FORM_RESPONSE_URL;
         form.method = "POST";
         form.target = frame.name;
+
+        if (usesAppsScript) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "payload";
+            input.value = JSON.stringify(payload);
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            form.remove();
+            return;
+        }
 
         const gameElementMap = {
             "Pollen (3 inch)": "Pollen",
