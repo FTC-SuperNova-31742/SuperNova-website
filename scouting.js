@@ -1,5 +1,5 @@
 (() => {
-    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3UQAa8iN6T90sVBu-WHM5Gd71XvC5Zrk7_RBgog1ksJJIjT-3LxmqzV95HtDZbw4TAg/exec";
+    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiLAJlqh9GGTIc4HLJGShPdq6hVLprxKFJ7l9sQvuUhvJu460AxyFCb17YEpteV8ukeQ/exec";
     const STORAGE_KEY = "supernova_31742_biobuzz_scout_v1";
     const SCRIPT_URL_OVERRIDE_KEY = "supernova_31742_sheets_script_url_override";
 
@@ -155,6 +155,11 @@
         try {
             const result = await loadJsonp(url, { action: "test" });
             if (!result.ok) throw new Error(result.error || "Apps Script returned an error");
+            const sheetLink = document.getElementById("scoutingOpenSheet");
+            if (sheetLink && result.spreadsheetUrl) {
+                sheetLink.href = result.spreadsheetUrl;
+                sheetLink.hidden = false;
+            }
             updateSyncBadge("connected");
             showToast("Google Sheets connection verified.", "success");
             return true;
@@ -173,33 +178,26 @@
             const result = await loadJsonp(url, { action: "entries" });
             if (!result.ok) throw new Error(result.error || "Could not read sheet entries");
 
-            let changed = false;
-            for (const remoteEntry of result.entries || []) {
-                const localIndex = entries.findIndex((entry) =>
-                    (entry.entryId && remoteEntry.entryId && String(entry.entryId) === String(remoteEntry.entryId)) ||
-                    (!remoteEntry.entryId && String(entry.teamNumber) === String(remoteEntry.teamNumber) && entry.teamName === remoteEntry.teamName)
-                );
+            const remoteEntries = (result.entries || []).map((remoteEntry) => ({
+                ...remoteEntry,
+                id: remoteEntry.entryId || `sheet-${remoteEntry.teamNumber}-${remoteEntry.teamName}-${remoteEntry.timestamp}`
+            }));
 
-                if (localIndex >= 0) {
-                    entries[localIndex] = {
-                        ...entries[localIndex],
-                        ...remoteEntry,
-                        id: entries[localIndex].id
-                    };
-                } else {
-                    entries.push({
-                        ...remoteEntry,
-                        id: `sheet-${remoteEntry.teamNumber}-${remoteEntry.teamName}-${remoteEntry.timestamp}`
-                    });
-                }
-                changed = true;
-            }
+            const unsyncedLocalEntries = entries.filter((entry) =>
+                entry.syncStatus === "submitted" || entry.syncStatus === "failed" || entry.syncStatus === "local"
+            );
 
-            if (changed) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-                updateStats();
-                renderTeamsList();
-            }
+            const combinedEntries = [...unsyncedLocalEntries, ...remoteEntries];
+            entries = combinedEntries.filter((entry, index, allEntries) =>
+                allEntries.findIndex((candidate) =>
+                    String(candidate.teamNumber) === String(entry.teamNumber) &&
+                    candidate.teamName === entry.teamName
+                ) === index
+            );
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+            updateStats();
+            renderTeamsList();
         } catch (error) {
             console.warn("Could not refresh Scouting entries:", error);
         }
@@ -265,7 +263,8 @@
             try {
                 const result = await loadJsonp(url, { action: "entries" });
                 const remoteEntry = (result.entries || []).find((item) =>
-                    String(item.entryId) === String(entry.entryId || entry.id)
+                    (item.entryId && String(item.entryId) === String(entry.entryId || entry.id)) ||
+                    (String(item.teamNumber) === String(entry.teamNumber) && item.teamName === entry.teamName)
                 );
 
                 if (remoteEntry) {

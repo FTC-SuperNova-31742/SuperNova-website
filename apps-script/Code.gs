@@ -1,8 +1,7 @@
-const SHEET_NAME = "Pit Scouting";
+const SHEET_NAME = "Pit Scouting Data";
 const PHOTO_FOLDER_NAME = "SuperNOVA 31742 Pit Scouting Photos";
 
 const HEADERS = [
-  "Entry ID",
   "Timestamp",
   "Team Number",
   "Team Name",
@@ -34,7 +33,6 @@ function doPost(request) {
     }
 
     sheet.appendRow([
-      data.entryId || "",
       data.timestamp || new Date(),
       data.teamNumber || "",
       data.teamName || "",
@@ -67,11 +65,13 @@ function doGet(request) {
   if (action === "test") {
     const sheet = getOrCreateSheet();
     ensureHeaders(sheet);
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     return jsonpResponse({
       ok: true,
       service: "SuperNOVA 31742 Pit Scouting",
       sheetName: SHEET_NAME,
-      rowCount: Math.max(sheet.getLastRow() - 1, 0)
+      rowCount: Math.max(sheet.getLastRow() - 1, 0),
+      spreadsheetUrl: spreadsheet.getUrl()
     }, callback);
   }
 
@@ -86,25 +86,25 @@ function doGet(request) {
 
     const values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
     const entries = values
-      .filter((row) => row[2] || row[3])
+      .filter((row) => row[1] || row[2])
       .map((row) => ({
-        entryId: String(row[0] || ""),
-        timestamp: row[1] instanceof Date ? row[1].toLocaleString() : String(row[1] || ""),
-        teamNumber: String(row[2] || ""),
-        teamName: String(row[3] || ""),
-        gameElements: String(row[4] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
-        scoringCaps: String(row[5] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
-        endgameSpecs: String(row[6] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
-        capabilitiesNotes: String(row[7] || ""),
-        autoStarts: String(row[8] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
-        autoActions: String(row[9] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
-        autoNotes: String(row[10] || ""),
-        localOutreach: String(row[11] || ""),
-        globalOutreach: String(row[12] || ""),
-        specialInfo: String(row[13] || ""),
-        photoPermission: String(row[14] || ""),
-        hasPhoto: Boolean(row[16]),
-        photoUrl: String(row[16] || ""),
+        entryId: "",
+        timestamp: row[0] instanceof Date ? row[0].toLocaleString() : String(row[0] || ""),
+        teamNumber: String(row[1] || ""),
+        teamName: String(row[2] || ""),
+        gameElements: String(row[3] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        scoringCaps: String(row[4] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        endgameSpecs: String(row[5] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        capabilitiesNotes: String(row[6] || ""),
+        autoStarts: String(row[7] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        autoActions: String(row[8] || "").split(/[,;]+/).map((item) => item.trim()).filter(Boolean),
+        autoNotes: String(row[9] || ""),
+        localOutreach: String(row[10] || ""),
+        globalOutreach: String(row[11] || ""),
+        specialInfo: String(row[12] || ""),
+        photoPermission: String(row[13] || ""),
+        hasPhoto: Boolean(row[15]),
+        photoUrl: String(row[15] || ""),
         synced: true,
         syncStatus: "verified"
       }));
