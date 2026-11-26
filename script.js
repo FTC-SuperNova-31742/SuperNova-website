@@ -12,7 +12,7 @@ const UPCOMING_EVENTS_URL = "data/upcoming-events.json";
 const MENTORS = [
     { name: "Tej Shah", role: "Head Coach", img: "assets/mugshots/Tej-Shah.jpg" },
     { name: "Yutong Zhu", role: "Lead Software", img: "assets/mugshots/Yutong-Zhu.jpg" },
-    { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonard-Luna.jpg" },
+    { name: "Leonardo Luna", role: "Lead Mechanical", img: "assets/mugshots/Leonardo-Luna.jpg" },
     { name: "Max Zamora", role: "Lead Mechanical", img: "assets/mugshots/Max-Zamora.jpg" },
     { name: "Jayden Mendoza", role: "Lead Media", img: "assets/mugshots/Jayden Mendoza.png" },
 ];
@@ -73,7 +73,7 @@ async function renderUpcomingEvents() {
     grid.innerHTML = '<div class="events-empty">Loading upcoming events.</div>';
 
     try {
-        const response = await fetch(UPCOMING_EVENTS_URL);
+        const response = await fetch(UPCOMING_EVENTS_URL, { cache: "no-store" });
 
         if (!response.ok) {
             throw new Error(`Failed to load ${UPCOMING_EVENTS_URL}`);
@@ -149,6 +149,18 @@ async function loadFragment(pageName, fragmentPath) {
     page.innerHTML = await response.text();
 }
 
+function refreshCalendarEmbed() {
+    const calendar = document.getElementById("team-calendar");
+
+    if (!calendar) {
+        return;
+    }
+
+    const url = new URL(calendar.src);
+    url.searchParams.set("refresh", Date.now().toString());
+    calendar.src = url.toString();
+}
+
 function showPage(pageName) {
     const pages = document.querySelectorAll(".page");
     for (const page of pages) {
@@ -172,6 +184,11 @@ function showPage(pageName) {
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (pageName === "calendar") {
+        renderUpcomingEvents();
+    }
+
     triggerReveal();
 }
 
@@ -220,10 +237,20 @@ function wireNavigation() {
         const pageName = getPageNameFromHash();
         showPage(pageName);
     });
-}
 
-async function init() {
-    wireNavigation();
+    document.addEventListener("click", (event) => {
+        if (event.target.closest("#calendar-refresh")) {
+            refreshCalendarEmbed();
+            renderUpcomingEvents();
+        }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && getPageNameFromHash() === "calendar") {
+            refreshCalendarEmbed();
+            renderUpcomingEvents();
+        }
+    });
 }
 
 async function init() {

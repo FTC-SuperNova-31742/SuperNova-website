@@ -326,6 +326,16 @@ h2.section-title {
 
 .calendar-section { margin-top: 4rem; }
 
+.calendar-section-header {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 1rem;
+}
+
+.calendar-section-header .btn-ghost {
+	cursor: pointer;
+}
+
 .calendar-section h3 {
 	font-family: var(--font-mono);
 	font-size: 1.3rem;
