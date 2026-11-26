@@ -120,7 +120,10 @@
             globalOutreach: entry.globalOutreach,
             specialDetails: entry.specialInfo,
             photoPermission: entry.photoPermission,
-            robotPhoto: photoData ? "Photo attached locally" : entry.photoPermission === "No" ? "Declined" : "No photo"
+            robotPhoto: entry.photoBase64 ? "Photo attached" : entry.photoPermission === "No" ? "Declined" : "No photo",
+            photoBase64: entry.photoBase64 || "",
+            photoMimeType: entry.photoMimeType || "",
+            photoName: entry.photoName || ""
         };
 
         try {
@@ -162,19 +165,15 @@
         togglePhotoUpload(true);
     }
 
-    async function handleSubmit(event) {
-        event.preventEventDefault;
-    }
-
     function updateStats() {
         const safeEntries = Array.isArray(entries) ? entries : [];
         document.getElementById("scoutedCountBadge").textContent = safeEntries.length;
         document.getElementById("statTotalScouted").textContent = safeEntries.length;
         document.getElementById("statHiveScout").textContent = safeEntries.filter((entry) =>
-            entry.scoringCaps.includes("Launch into Hive")
+            (entry.scoringCaps || []).includes("Launch into Hive")
         ).length;
         document.getElementById("statAutoScout").textContent = safeEntries.filter((entry) =>
-            entry.autoStarts.length && !entry.autoStarts.includes("No Auto")
+            (entry.autoStarts || []).length && !(entry.autoStarts || []).includes("No Auto")
         ).length;
     }
 
@@ -205,8 +204,8 @@
                     <div><strong>#${escapeHtml(entry.teamNumber)}</strong> ${escapeHtml(entry.teamName)}</div>
                     <span class="scouting-sync-status ${entry.synced ? "synced" : "pending"}">${entry.synced ? "Synced" : "Local Only"}</span>
                 </div>
-                <p><strong>Capabilities:</strong> ${escapeHtml(entry.scoringCaps.join(", ") || "None listed")}</p>
-                <p><strong>Auto:</strong> ${escapeHtml(entry.autoStarts.join(", ") || "None")} - ${escapeHtml(entry.autoActions.join(", ") || "No actions listed")}</p>
+                <p><strong>Capabilities:</strong> ${escapeHtml((entry.scoringCaps || []).join(", ") || "None listed")}</p>
+                <p><strong>Auto:</strong> ${escapeHtml((entry.autoStarts || []).join(", ") || "None")} - ${escapeHtml((entry.autoActions || []).join(", ") || "No actions listed")}</p>
                 <p class="scouting-team-time">${escapeHtml(entry.timestamp)}</p>
             </article>
         `).join("");
@@ -305,6 +304,9 @@
                 specialInfo: document.getElementById("specialInfo").value.trim(),
                 photoPermission,
                 hasPhoto: Boolean(photoData),
+                photoBase64: photoData,
+                photoMimeType: photoData ? "image/jpeg" : "",
+                photoName: photoData ? `31742-team-${document.getElementById("teamNumber").value.trim()}-${Date.now()}.jpg` : "",
                 synced: false
             };
 
@@ -324,7 +326,17 @@
     window.initScoutingApp = function () {
         if (!document.getElementById("pitScoutForm") || initialized) return;
         initialized = true;
-        entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]").map((entry) => ({
+            ...entry,
+            gameElements: entry.gameElements || [],
+            scoringCaps: entry.scoringCaps || [],
+            endgameSpecs: entry.endgameSpecs || [],
+            autoStarts: entry.autoStarts || [],
+            autoActions: entry.autoActions || [],
+            photoBase64: entry.photoBase64 || "",
+            photoMimeType: entry.photoMimeType || "",
+            photoName: entry.photoName || ""
+        }));
         updateSyncBadge();
         updateStats();
         renderTeamsList();
