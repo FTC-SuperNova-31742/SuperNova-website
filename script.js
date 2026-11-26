@@ -263,9 +263,6 @@ function showPage(pageName) {
         renderUpcomingEvents();
     }
 
-    if (pageName === "scouting" && window.initScoutingApp) {
-        window.initScoutingApp();
-    }
 
     triggerReveal();
 }
