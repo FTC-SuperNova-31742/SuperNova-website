@@ -203,8 +203,8 @@ function triggerReveal() {
 }
 
 function getPageNameFromHash() {
-    const hash = window.location.hash.slice(1); // Remove the '#' character
-    return hash && hash in PAGE_FRAGMENTS ? hash : "home";
+    const hash = window.location.hash.slice(1).toLowerCase();
+    return hash && Object.hasOwn(PAGE_FRAGMENTS, hash) ? hash : "home";
 }
 
 function navigateTo(pageName) {
