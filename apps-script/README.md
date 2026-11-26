@@ -4,13 +4,20 @@ Use this setup to make the scouting page write and read one Google Spreadsheet.
 
 Verified Web App URL:
 
-`https://script.google.com/macros/s/AKfycbxmvT8KYCnSxzTtg-htnOWjWrkfWj7VsVoVlbIMZwZbXXY1tqjsIKq--NTI1QzONejajQ/exec`
+Admin Web App:
 
-Verified connected spreadsheet:
+`https://script.google.com/macros/s/AKfycbw0ujMLzlZq0tRJN0hRSnT0tcE0xTnfVMwM8q46z24Y3pTRtQ-mxWkVSxgthkyUKTB3aw/exec`
 
-`https://docs.google.com/spreadsheets/d/1ns9RLojmf8AaNKSYVvqHISWrg9uHx3tzrH2rEga8kwM/edit`
+Scouting Web App:
 
-Its active data tab is `Pit Scouting Data`.
+`https://script.google.com/macros/s/AKfycbwKqe78cDUPXP2DHvon0yJCDGj0Vl6h0T1jR_APnwPHrXGaKOmGtJ6ygkbO_e8vnNn6Aw/exec`
+
+Connected spreadsheets:
+
+- Scouting spreadsheet: `https://docs.google.com/spreadsheets/d/1uxxjEoRYpS1YpkFnztJhX04xxVE3xNB92xFkl--5Jfc/edit`
+- Admin spreadsheet: `https://docs.google.com/spreadsheets/d/1ns9RLojmf8AaNKSYVvqHISWrg9uHx3tzrH2rEga8kwM/edit`
+
+The scouting data tab is `Pit Scouting Data`. The admin spreadsheet contains `Settings`, `Events`, and `Resources` tabs.
 
 1. Create or open the Google Sheet that should store all scouting entries.
 2. In the sheet, open **Extensions > Apps Script**.

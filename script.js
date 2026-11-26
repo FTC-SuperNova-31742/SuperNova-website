@@ -137,6 +137,75 @@ function formatEventDate(value) {
     }).format(date);
 }
 
+async function fetchManagedEvents() {
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbwPwLv43syfL-OBctFDyrLYNOhj-1dl4Ob96-Qshesj1nDWNmMOgat98Uu1Zjlwf3DmxA/exec";
+
+    try {
+        const response = await fetch(`${scriptUrl}?action=events&_=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("Could not read managed events");
+        const result = await response.json();
+        if (result && Array.isArray(result.events)) return result.events;
+    } catch (error) {
+        console.warn("Could not load managed events:", error);
+    }
+
+    try {
+        const response = await fetch(UPCOMING_EVENTS_URL, { cache: "no-store" });
+        if (response.ok) return await response.json();
+    } catch (error) {
+        console.warn("Could not load fallback events:", error);
+    }
+
+    return [];
+}
+
+async function fetchManagedResources() {
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbwPwLv43syfL-OBctFDyrLYNOhj-1dl4Ob96-Qshesj1nDWNmMOgat98Uu1Zjlwf3DmxA/exec";
+
+    try {
+        const response = await fetch(`${scriptUrl}?action=resources&_=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("Could not read managed resources");
+        const result = await response.json();
+        if (result && Array.isArray(result.resources)) return result.resources;
+    } catch (error) {
+        console.warn("Could not load managed resources:", error);
+    }
+
+    return [];
+}
+
+async function renderManagedResources() {
+    const grid = document.querySelector(".resources-grid");
+    if (!grid) return;
+
+    const resources = await fetchManagedResources();
+    grid.querySelectorAll("[data-managed-resource]").forEach((card) => card.remove());
+
+    resources.forEach((resource) => {
+        const card = document.createElement("a");
+        card.className = "resource-card";
+        card.dataset.managedResource = "true";
+        card.href = resource.url;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+
+        const title = document.createElement("div");
+        title.className = "resource-title";
+        title.textContent = resource.title;
+
+        const description = document.createElement("div");
+        description.className = "resource-desc";
+        description.textContent = resource.description || "Team resource";
+
+        const tag = document.createElement("span");
+        tag.className = "resource-tag";
+        tag.textContent = resource.category;
+
+        card.append(title, description, tag);
+        grid.appendChild(card);
+    });
+}
+
 async function renderUpcomingEvents() {
     const grid = document.getElementById("upcoming-events-grid");
 
@@ -147,13 +216,7 @@ async function renderUpcomingEvents() {
     grid.innerHTML = '<div class="events-empty">Loading upcoming events.</div>';
 
     try {
-        const response = await fetch(UPCOMING_EVENTS_URL, { cache: "no-store" });
-
-        if (!response.ok) {
-            throw new Error(`Failed to load ${UPCOMING_EVENTS_URL}`);
-        }
-
-        const events = await response.json();
+        const events = await fetchManagedEvents();
         const now = new Date();
 
         const upcomingEvents = events
@@ -261,6 +324,10 @@ function showPage(pageName) {
 
     if (pageName === "calendar") {
         renderUpcomingEvents();
+    }
+
+    if (pageName === "resources") {
+        renderManagedResources();
     }
 
 

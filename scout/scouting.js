@@ -1,5 +1,5 @@
 (() => {
-    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmvT8KYCnSxzTtg-htnOWjWrkfWj7VsVoVlbIMZwZbXXY1tqjsIKq--NTI1QzONejajQ/exec";
+    const EMBEDDED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKqe78cDUPXP2DHvon0yJCDGj0Vl6h0T1jR_APnwPHrXGaKOmGtJ6ygkbO_e8vnNn6Aw/exec";
     const LEGACY_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxF1c2E9hXuhv6TmRY52DeedygdHZmmaPqmCD4o0hUjrtO1gPhT1fgDaHALGCbnhHA/exec";
     const GOOGLE_FORM_RESPONSE_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdQvNgWJgksQWDhp6xXgAeIb-GZo-9MqaQylGo7iRy0rTM8Gg/formResponse";
     const STORAGE_KEY = "supernova_31742_biobuzz_scout_v1";
