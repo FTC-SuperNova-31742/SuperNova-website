@@ -205,8 +205,6 @@
     }
 
     async function pushEntry(entry) {
-        const url = getScriptUrl();
-        if (!url) return false;
 
         const payload = {
             entryId: entry.id,
@@ -231,7 +229,7 @@
         };
 
         try {
-            submitViaHiddenForm(url, payload);
+            submitViaHiddenForm(GOOGLE_FORM_RESPONSE_URL, payload);
 
             entry.synced = false;
             entry.syncStatus = "submitted";
@@ -263,27 +261,28 @@
         form.target = frame.name;
 
         const gameElementMap = {
-            "Pollen (3-inch balls)": "Pollen",
+            "Pollen (3 inch)": "Pollen",
             "Nectar": "Nectar",
-            "Both Elements": "Both Elements",
-            "Neither / Push": "Neither / Push"
+            "Both Pollen & Nectar": "Both Elements",
+            "Neither (Defense/Pushbot)": "Neither / Push"
         };
         const scoringMap = {
-            "Launch into the Hive": "Launch into Hive",
-            "Place in Flowers": "Place in Flowers",
+            "Launch into Hive": "Launch into Hive",
+            "Place in Flowers (Endgame)": "Place in Flowers",
             "Score in Garden": "Score in Garden",
-            "Pull Pollen from Flowers": "Pull Pollen",
-            "Collect floor / corners": "Collect floor/corners"
+            "Pull Pollen out of Flower": "Pull Pollen",
+            "Collect from Floor/Corners": "Collect floor/corners"
         };
         const endgameMap = {
             "Park in Loading Zone": "Park in Loading Zone",
-            "Carries 4 Pollen": "Carries 4 Pollen",
-            "Uses AprilTags / vision": "Uses AprilTags/vision"
+            "Max Capacity (4 Pollen)": "Carries 4 Pollen",
+            "Uses AprilTags/Vision Alignment": "Uses AprilTags/vision"
         };
         const autoMap = {
-            "Launches pre-loaded Pollen": "Scores Preload",
-            "Intakes field Pollen": "Picks Up & Scores Extra Elements",
-            "Parks in Loading Zone": "Parks in Target Zone",
+            "Leaves Starting Location (SWARM RP)": "Navigates Using AprilTags / Vision",
+            "Launches Pre-loaded Pollen into Hive": "Scores Preload",
+            "Intakes Extra Field Pollen": "Picks Up & Scores Extra Elements",
+            "Parks in Loading Zone in Auto": "Parks in Target Zone",
             "No Auto": "No Autonomous"
         };
 
@@ -352,7 +351,7 @@
         entry.syncStatus = "submitted";
         localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
         renderTeamsList();
-        showToast(`Team #${entry.teamNumber} was submitted but could not be verified yet.`, "info");
+        showToast(`Team #${entry.teamNumber} submitted to Google Form.`, "success");
     }
 
     function switchTab(tabName) {
@@ -414,7 +413,7 @@
             <article class="scouting-team-card">
                 <div class="scouting-team-card-header">
                     <div><strong>#${escapeHtml(entry.teamNumber)}</strong> ${escapeHtml(entry.teamName)}</div>
-                    <span class="scouting-sync-status ${entry.syncStatus === "verified" ? "synced" : "pending"}">${entry.syncStatus === "verified" ? "Verified in Sheet" : entry.syncStatus === "submitted" ? "Submitted - Pending Verification" : "Local Only"}</span>
+                    <span class="scouting-sync-status ${entry.syncStatus === "verified" ? "synced" : "pending"}">${entry.syncStatus === "verified" ? "Verified in Sheet" : entry.syncStatus === "submitted" ? "Submitted to Google Form" : "Local Only"}</span>
                 </div>
                 <p><strong>Capabilities:</strong> ${escapeHtml((entry.scoringCaps || []).join(", ") || "None listed")}</p>
                 <p><strong>Auto:</strong> ${escapeHtml((entry.autoStarts || []).join(", ") || "None")} - ${escapeHtml((entry.autoActions || []).join(", ") || "No actions listed")}</p>
@@ -549,9 +548,8 @@
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 
-            let submitted = false;
-            if (getScriptUrl()) submitted = await pushEntry(entry);
-            showToast(submitted ? `Team #${entry.teamNumber} submitted. Waiting for sheet verification.` : `Team #${entry.teamNumber} saved locally; Sheets is unreachable.`, submitted ? "info" : "error");
+            const submitted = await pushEntry(entry);
+            showToast(submitted ? `Team #${entry.teamNumber} submitted to Google Form.` : `Team #${entry.teamNumber} saved locally; submission failed.`, submitted ? "success" : "error");
 
             resetForm();
             updateStats();
