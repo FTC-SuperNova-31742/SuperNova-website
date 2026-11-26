@@ -4,6 +4,7 @@ const PAGE_FRAGMENTS = {
     team: "pages/meet-the-mentors.html",
     calendar: "pages/calendar.html",
     biobuzz: "pages/bio-buzz.html",
+    resources: "pages/resources.html",
     contact: "pages/contact.html",
 };
 

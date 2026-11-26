@@ -491,6 +491,33 @@ h2.section-title {
 	color: var(--text-dim);
 }
 
+.app-feature {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 1.5rem;
+	margin-top: 2.5rem;
+	padding: 1.5rem;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-accent);
+}
+
+.app-feature h3 {
+	margin: 0 0 0.5rem;
+	color: var(--accent-color);
+	font-family: var(--font-mono);
+}
+
+.app-preview {
+	display: block;
+	width: 100%;
+	min-height: 420px;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: #fff;
+}
+
 .resources-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -633,6 +660,7 @@ footer {
 
 @media (max-width: 700px) {
 	.about-grid { grid-template-columns: 1fr; gap: 2rem; }
+	.app-feature { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
